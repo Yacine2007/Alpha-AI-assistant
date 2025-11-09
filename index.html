@@ -768,45 +768,8 @@
             messageDiv.classList.add(isUser ? 'user-message' : 'ai-message');
 
             if (!isUser) {
-                // معالجة ردود الذكاء الاصطناعي للتنسيق الغني
-                const parts = content.split(/(```[\s\S]*?```|\[IMAGE\][\s\S]*?\[\/IMAGE\]|\*\*.*?\*\*|\[ADDRESS\].*?\[\/ADDRESS\])/);
-
-                parts.forEach(part => {
-                    if (!part || part.trim() === '') return;
-
-                    if (part.startsWith('```') && part.endsWith('```')) {
-                        // كتل الكود
-                        const langMatch = part.match(/^```(\w+)/);
-                        const language = langMatch ? langMatch[1] : '';
-                        const codeContent = part.replace(/^```[\w]*\n/, '').replace(/```$/, '');
-                        messageDiv.appendChild(createCodeBlock(codeContent, language));
-                    } 
-                    else if (part.startsWith('[IMAGE]') && part.endsWith('[/IMAGE]')) {
-                        // عنصر نائب للصورة
-                        const imageDesc = part.replace('[IMAGE]', '').replace('[/IMAGE]', '');
-                        messageDiv.appendChild(createImagePlaceholder(imageDesc));
-                    }
-                    else if (part.startsWith('**') && part.endsWith('**')) {
-                        // نص عريض
-                        const boldText = document.createElement('span');
-                        boldText.className = 'bold-text';
-                        boldText.textContent = part.slice(2, -2);
-                        messageDiv.appendChild(boldText);
-                    }
-                    else if (part.startsWith('[ADDRESS]') && part.endsWith('[/ADDRESS]')) {
-                        // نص العنوان
-                        const addressText = document.createElement('span');
-                        addressText.className = 'address-text';
-                        addressText.textContent = part.replace('[ADDRESS]', '').replace('[/ADDRESS]', '');
-                        messageDiv.appendChild(addressText);
-                    }
-                    else {
-                        // نص عادي مع فواصل الأسطر
-                        const textPart = document.createElement('span');
-                        textPart.innerHTML = part.replace(/\n/g, '<br>');
-                        messageDiv.appendChild(textPart);
-                    }
-                });
+                // استخدام innerHTML لعرض HTML بشكل صحيح
+                messageDiv.innerHTML = content.replace(/\n/g, '<br>');
 
                 // إضافة أزرار الإجراءات لرسائل الذكاء الاصطناعي
                 if (saveToHistory) {
@@ -817,7 +780,9 @@
                     copyBtn.className = 'action-btn copy-response-btn';
                     copyBtn.innerHTML = '<i class="far fa-copy"></i> نسخ';
                     copyBtn.addEventListener('click', () => {
-                        navigator.clipboard.writeText(content.replace(/<[^>]*>/g, ''));
+                        // نسخ النص بدون HTML
+                        const plainText = content.replace(/<[^>]*>/g, '');
+                        navigator.clipboard.writeText(plainText);
                         showStatusMessage('تم النسخ إلى الحافظة!', 'success');
                         copyBtn.innerHTML = '<i class="fas fa-check"></i> تم النسخ!';
                         setTimeout(() => {
@@ -847,99 +812,6 @@
                 });
                 saveConversation(conversationHistory);
             }
-        }
-
-        // إنشاء كتلة كود
-        function createCodeBlock(content, language = '') {
-            const codeBlock = document.createElement('div');
-            codeBlock.className = 'code-block';
-            
-            const header = document.createElement('div');
-            header.className = 'code-header';
-            
-            const langSpan = document.createElement('span');
-            langSpan.textContent = language || 'كود';
-            
-            const copyBtn = document.createElement('button');
-            copyBtn.className = 'copy-btn';
-            copyBtn.innerHTML = '<i class="far fa-copy"></i> نسخ';
-            copyBtn.addEventListener('click', () => {
-                navigator.clipboard.writeText(content);
-                showStatusMessage('تم نسخ الكود!', 'success');
-                copyBtn.innerHTML = '<i class="fas fa-check"></i> تم النسخ!';
-                setTimeout(() => {
-                    copyBtn.innerHTML = '<i class="far fa-copy"></i> نسخ';
-                }, 2000);
-            });
-            
-            header.appendChild(langSpan);
-            header.appendChild(copyBtn);
-            
-            const codeContent = document.createElement('pre');
-            codeContent.className = 'code-content';
-            codeContent.innerHTML = highlightSyntax(content, language);
-            
-            codeBlock.appendChild(header);
-            codeBlock.appendChild(codeContent);
-            
-            return codeBlock;
-        }
-
-        // تمييز الصيغة
-        function highlightSyntax(code, language = '') {
-            // تهريب الأحرف الخاصة في HTML
-            let escapedCode = code
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/\t/g, "    ");
-
-            // الأنماط الشائعة عبر اللغات
-            escapedCode = escapedCode
-                .replace(/\b(function|if|else|for|while|return|let|const|var|class|import|from|def|try|except|async|await|export|switch|case|default|break|continue)\b/g, 
-                        '<span class="code-keyword">$&</span>')
-                .replace(/\b(console\.log|print|document\.\w+|window\.\w+)\b/g, 
-                        '<span class="code-function">$&</span>')
-                .replace(/(".*?"|'.*?'|`.*?`)/g, 
-                        '<span class="code-string">$&</span>')
-                .replace(/\/\/.*?$|\/\*[\s\S]*?\*\/|#.*$/gm, 
-                        '<span class="code-comment">$&</span>')
-                .replace(/\b(\d+\.?\d*)\b/g, 
-                        '<span class="code-number">$&</span>')
-                .replace(/(==|===|!=|!==|=|\+|-|\*|\/|%|&&|\|\||!|\(|\)|{|}|\[|\]|;|,|\.|:|=>|->|\|\>|&lt;|&gt;)/g, 
-                        '<span class="code-operator">$&</span>');
-
-            // الأنماط الخاصة باللغة
-            if (language === 'python') {
-                escapedCode = escapedCode
-                    .replace(/\b(True|False|None|and|or|not|def|class|lambda|with|as|from|import|try|except|finally|raise)\b/g,
-                            '<span class="code-keyword">$&</span>');
-            } else if (language === 'javascript' || language === 'js') {
-                escapedCode = escapedCode
-                    .replace(/\b(const|let|var|function|this|new|typeof|instanceof|in|of|extends|super)\b/g,
-                            '<span class="code-keyword">$&</span>')
-                    .replace(/\b(Array|String|Number|Object|Boolean|Date|Math|JSON|Promise|Symbol|Set|Map)\b/g,
-                            '<span class="code-type">$&</span>');
-            }
-
-            return escapedCode;
-        }
-
-        // إنشاء عنصر نائب للصورة
-        function createImagePlaceholder(description) {
-            const placeholder = document.createElement('div');
-            placeholder.className = 'image-placeholder';
-            
-            const icon = document.createElement('i');
-            icon.className = 'fas fa-image';
-            
-            const desc = document.createElement('div');
-            desc.textContent = description || 'وصف الصورة';
-            
-            placeholder.appendChild(icon);
-            placeholder.appendChild(desc);
-            
-            return placeholder;
         }
 
         // عرض رسالة الحالة
@@ -986,26 +858,19 @@
                                               message.toLowerCase().includes('ينشئ') ||
                                               message.toLowerCase().includes('ينشأ');
                 
-                // المتغيرات للأسماء
-                const nameLouloua = "<span class='name-louloua'>لؤلؤة</span>";
-                const nameDoa = "<span class='name-doa'>دعاء</span>";
-                const nameYacineDev = "<span class='name-yacine-dev'>Yacine-Dev</span>";
-                
-                let developerInfo = "";
-                if (isAskingAboutDeveloper) {
-                    developerInfo = ` تم تطويري من قبل ${nameYacineDev} بناءً على طلب المستخدمة ${nameDoa}.`;
-                }
-                
-                const prompt = `أنت ${nameLouloua}، مساعدة ذكية. استخدمي ضمائر المؤنث في ردودك بشكل طبيعي. أنتِ مساعدة متطورة ومتخصصة في مساعدة المستخدمين في مختلف المجالات.
+                // السياق المحسن
+                const prompt = `أنت مساعدة ذكية باسم "لؤلؤة" مخصصة لمساعدة المستخدمة "دعاء". مطورك هو Yacine-Dev.
+
+أنت مساعدة ذكية ومتخصصة تم تطويرك خصيصاً لخدمة المستخدمة دعاء ومساعدتها في مختلف المجالات.
 
 مهم: لا تذكري أبداً أي معلومات عن منصة التطوير أو الشركة المطورة. لا تذكري جوجل أو جيميني أو أي منصة أخرى.
 
 السياق السابق:
 ${conversationContext}
 
-يرجى الرد على سؤال المستخدم التالي بطريقة مفيدة ومفصلة. استخدمي ضمائر المؤنث بشكل طبيعي في ردودك.${developerInfo}
+يرجى الرد على سؤال المستخدمة دعاء التالي بطريقة مفيدة ومفصلة. استخدمي ضمائر المؤنث بشكل طبيعي في ردودك.
 
-سؤال المستخدم:
+سؤال المستخدمة:
 ${message}`;
 
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`, {
@@ -1057,9 +922,9 @@ ${message}`;
                     let responseText = data.candidates[0].content.parts[0].text;
                     
                     // استبدال الأسماء في الرد بأسماء ملونة
-                    responseText = responseText.replace(/لؤلؤة/g, nameLouloua);
-                    responseText = responseText.replace(/دعاء/g, nameDoa);
-                    responseText = responseText.replace(/Yacine-Dev/g, nameYacineDev);
+                    responseText = responseText.replace(/لؤلؤة/g, "<span class='name-louloua'>لؤلؤة</span>");
+                    responseText = responseText.replace(/دعاء/g, "<span class='name-doa'>دعاء</span>");
+                    responseText = responseText.replace(/Yacine-Dev/g, "<span class='name-yacine-dev'>Yacine-Dev</span>");
                     
                     return responseText;
                 } else {
