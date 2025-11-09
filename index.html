@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loê Loã AI</title>
+    <title>Loê Loã AI - مساعدتك الذكية</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -13,6 +13,7 @@
             --accent-pink: #FF005B;
             --light-pink: #FF2EE4;
             --gradient-pink: linear-gradient(135deg, #FF005B, #FF2EE4);
+            --gradient-blue: linear-gradient(135deg, #4A00E0, #8E2DE2);
             --text-primary: #333333;
             --text-secondary: #6C757D;
             --chat-bubble-ai: #FFFFFF;
@@ -21,7 +22,9 @@
             --error-red: #DC3545;
             --border-color: #E9ECEF;
             --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.15);
             --radius: 16px;
+            --transition: all 0.3s ease;
         }
 
         * {
@@ -50,7 +53,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #FF005B, #FF2EE4);
+            background: var(--gradient-pink);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -62,10 +65,16 @@
             background: white;
             padding: 2.5rem;
             border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-lg);
             width: 90%;
             max-width: 400px;
             text-align: center;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .auth-title {
@@ -75,7 +84,7 @@
             font-weight: 700;
             font-family: 'Tajawal', sans-serif;
             letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #FF005B, #FF2EE4);
+            background: var(--gradient-pink);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -94,7 +103,7 @@
             border: 1px solid var(--border-color);
             border-radius: 10px;
             font-size: 1rem;
-            transition: all 0.3s;
+            transition: var(--transition);
         }
 
         .auth-input:focus {
@@ -113,7 +122,7 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: var(--transition);
         }
 
         .auth-button:hover {
@@ -144,6 +153,7 @@
             margin-top: 10px;
             margin-bottom: 10px;
             height: calc(100vh - 20px);
+            transition: var(--transition);
         }
 
         .chat-header {
@@ -153,6 +163,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .chat-title {
@@ -165,7 +176,12 @@
             letter-spacing: -0.5px;
         }
 
-        .clear-btn {
+        .chat-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .header-btn {
             background: rgba(255, 255, 255, 0.2);
             border: none;
             border-radius: 8px;
@@ -176,10 +192,10 @@
             align-items: center;
             gap: 0.5rem;
             font-size: 0.9rem;
-            transition: all 0.3s;
+            transition: var(--transition);
         }
 
-        .clear-btn:hover {
+        .header-btn:hover {
             background: rgba(255, 255, 255, 0.3);
         }
 
@@ -256,7 +272,7 @@
             align-items: center;
             gap: 0.3rem;
             font-size: 0.85rem;
-            transition: all 0.2s;
+            transition: var(--transition);
         }
 
         .action-btn:hover {
@@ -292,7 +308,7 @@
             background-color: var(--primary-bg);
             color: var(--text-primary);
             outline: none;
-            transition: all 0.3s;
+            transition: var(--transition);
             font-size: 1rem;
             min-height: 50px;
             max-height: 120px;
@@ -315,7 +331,7 @@
             color: white;
             border: none;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -413,7 +429,7 @@
             align-items: center;
             gap: 0.3rem;
             font-size: 0.8rem;
-            transition: all 0.2s;
+            transition: var(--transition);
         }
 
         .copy-btn:hover {
@@ -571,6 +587,16 @@
             .auth-box {
                 padding: 2rem 1.5rem;
             }
+            
+            .chat-actions {
+                flex-direction: column;
+                gap: 0.3rem;
+            }
+            
+            .header-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
@@ -592,10 +618,16 @@
             <div class="chat-title">
                 <span>Loê Loã AI - مساعدتك الذكية</span>
             </div>
-            <button class="clear-btn" id="clear-button">
-                <i class="fas fa-trash-alt"></i>
-                مسح المحادثة
-            </button>
+            <div class="chat-actions">
+                <button class="header-btn" id="theme-button">
+                    <i class="fas fa-moon"></i>
+                    الوضع الليلي
+                </button>
+                <button class="header-btn" id="clear-button">
+                    <i class="fas fa-trash-alt"></i>
+                    مسح المحادثة
+                </button>
+            </div>
         </div>
         
         <div class="chat-messages" id="chat-messages">
@@ -635,6 +667,7 @@
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
         const clearButton = document.getElementById('clear-button');
+        const themeButton = document.getElementById('theme-button');
         const typingIndicator = document.getElementById('typing-indicator');
 
         // التحقق من كلمة المرور
@@ -685,6 +718,9 @@
             
             // التركيز على حقل الإدخال
             userInput.focus();
+            
+            // تهيئة الوضع الليلي
+            initializeTheme();
         }
 
         // ضبط المستمعين للأحداث
@@ -707,11 +743,37 @@
                 clearChat(conversationHistory);
             });
 
+            // تبديل الوضع الليلي
+            themeButton.addEventListener('click', toggleTheme);
+
             // تعديل حجم حقل الإدخال تلقائياً
             userInput.addEventListener('input', function() {
                 this.style.height = 'auto';
                 this.style.height = (this.scrollHeight) + 'px';
             });
+        }
+
+        // تهيئة الوضع الليلي
+        function initializeTheme() {
+            const isDarkMode = localStorage.getItem('loeloai_darkMode') === 'true';
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                themeButton.innerHTML = '<i class="fas fa-sun"></i> الوضع النهاري';
+            }
+        }
+
+        // تبديل الوضع الليلي
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            
+            if (isDarkMode) {
+                themeButton.innerHTML = '<i class="fas fa-sun"></i> الوضع النهاري';
+            } else {
+                themeButton.innerHTML = '<i class="fas fa-moon"></i> الوضع الليلي';
+            }
+            
+            localStorage.setItem('loeloai_darkMode', isDarkMode);
         }
 
         // إرسال رسالة
@@ -769,7 +831,7 @@
 
             if (!isUser) {
                 // معالجة ردود الذكاء الاصطناعي للتنسيق الغني
-                const parts = content.split(/(```[\s\S]*?```|\[IMAGE\][\s\S]*?\[\/IMAGE\]|\*\*.*?\*\*|\[ADDRESS\].*?\[\/ADDRESS\])/);
+                const parts = content.split(/(```[\s\S]*?```|\[IMAGE\][\s\S]*?\[\/IMAGE\]|\*\*.*?\*\*)/);
 
                 parts.forEach(part => {
                     if (!part || part.trim() === '') return;
@@ -790,18 +852,11 @@
                         // نص عريض
                         const boldText = document.createElement('span');
                         boldText.className = 'bold-text';
-                        boldText.textContent = part.slice(2, -2);
+                        boldText.innerHTML = part.slice(2, -2);
                         messageDiv.appendChild(boldText);
                     }
-                    else if (part.startsWith('[ADDRESS]') && part.endsWith('[/ADDRESS]')) {
-                        // نص العنوان
-                        const addressText = document.createElement('span');
-                        addressText.className = 'address-text';
-                        addressText.textContent = part.replace('[ADDRESS]', '').replace('[/ADDRESS]', '');
-                        messageDiv.appendChild(addressText);
-                    }
                     else {
-                        // نص عادي مع فواصل الأسطر
+                        // نص عادي مع فواصل الأسطر - استخدم innerHTML لتفعيل التنسيق
                         const textPart = document.createElement('span');
                         textPart.innerHTML = part.replace(/\n/g, '<br>');
                         messageDiv.appendChild(textPart);
@@ -817,7 +872,7 @@
                     copyBtn.className = 'action-btn copy-response-btn';
                     copyBtn.innerHTML = '<i class="far fa-copy"></i> نسخ';
                     copyBtn.addEventListener('click', () => {
-                        navigator.clipboard.writeText(content);
+                        navigator.clipboard.writeText(content.replace(/<[^>]*>/g, '')); // نسخ النص بدون HTML
                         showStatusMessage('تم النسخ إلى الحافظة!', 'success');
                         copyBtn.innerHTML = '<i class="fas fa-check"></i> تم النسخ!';
                         setTimeout(() => {
@@ -1080,5 +1135,100 @@ ${message}`;
             }
         }
     </script>
+
+    <style>
+        /* تنسيقات الوضع الليلي */
+        body.dark-mode {
+            --primary-bg: #1a1a2e;
+            --secondary-bg: #16213e;
+            --text-primary: #e6e6e6;
+            --text-secondary: #a0a0a0;
+            --border-color: #2d3748;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        body.dark-mode .auth-box {
+            background: #2d3748;
+            color: #e6e6e6;
+        }
+
+        body.dark-mode .auth-input {
+            background: #4a5568;
+            border-color: #4a5568;
+            color: #e6e6e6;
+        }
+
+        body.dark-mode .auth-input:focus {
+            border-color: var(--accent-pink);
+            box-shadow: 0 0 0 3px rgba(255, 0, 91, 0.2);
+        }
+
+        body.dark-mode .auth-subtitle {
+            color: #a0a0a0;
+        }
+
+        body.dark-mode .chat-container {
+            background-color: var(--primary-bg);
+        }
+
+        body.dark-mode .ai-message {
+            background-color: #2d3748;
+            border-color: #4a5568;
+            color: #e6e6e6;
+        }
+
+        body.dark-mode #user-input {
+            background-color: #2d3748;
+            border-color: #4a5568;
+            color: #e6e6e6;
+        }
+
+        body.dark-mode #user-input:focus {
+            border-color: var(--accent-pink);
+            box-shadow: 0 0 0 3px rgba(255, 0, 91, 0.2);
+        }
+
+        body.dark-mode .input-container {
+            background-color: var(--primary-bg);
+            border-top-color: #4a5568;
+        }
+
+        body.dark-mode .action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #a0a0a0;
+        }
+
+        body.dark-mode .action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #e6e6e6;
+        }
+
+        body.dark-mode .code-block {
+            background-color: #0f1419;
+            border-color: rgba(255, 0, 91, 0.3);
+        }
+
+        body.dark-mode .code-header {
+            background-color: #1f2937;
+            color: #9cdcfe;
+        }
+
+        body.dark-mode .code-content {
+            background-color: #0f1419;
+            color: #d4d4d4;
+        }
+
+        body.dark-mode .image-placeholder {
+            background-color: #1f2937;
+            color: #a0a0a0;
+            border-color: rgba(255, 0, 91, 0.3);
+        }
+
+        body.dark-mode .typing-indicator {
+            background-color: #2d3748;
+            border-color: #4a5568;
+        }
+    </style>
 </body>
 </html>
