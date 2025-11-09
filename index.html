@@ -500,6 +500,38 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
 
+        /* زر التواصل مع المطور */
+        .contact-developer-btn {
+            background: var(--gradient-pink);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.7rem 1.2rem;
+            margin-top: 1rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(255, 0, 91, 0.2);
+        }
+
+        .contact-developer-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 0, 91, 0.3);
+        }
+
+        .contact-developer-btn:active {
+            transform: translateY(0);
+        }
+
+        .contact-developer-btn i {
+            font-size: 1rem;
+        }
+
         /* تحسينات للشاشات الصغيرة */
         @media (max-width: 768px) {
             .chat-container {
@@ -536,6 +568,11 @@
                 padding: 0.3rem 0.6rem;
                 font-size: 0.8rem;
             }
+
+            .contact-developer-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -570,6 +607,11 @@
             
             .auth-box {
                 padding: 2rem 1.5rem;
+            }
+
+            .contact-developer-btn {
+                padding: 0.5rem 0.9rem;
+                font-size: 0.85rem;
             }
         }
     </style>
@@ -624,6 +666,7 @@
         // الثوابت والمتغيرات العامة
         const API_KEY = 'AIzaSyA5oSAejSZpna3YIENzx5q6Vvcl2mynPls';
         const PASSWORD = 'dolo2007';
+        const DEVELOPER_CONTACT_URL = 'https://yacine2007.github.io/Yacine2007/communication.html';
         
         // العناصر الرئيسية
         const authContainer = document.getElementById('auth-container');
@@ -771,6 +814,12 @@
                 // استخدام innerHTML لعرض HTML بشكل صحيح
                 messageDiv.innerHTML = content.replace(/\n/g, '<br>');
 
+                // إضافة زر التواصل إذا كان المستخدم يسأل عن التواصل مع المطور
+                if (isAskingAboutContact(messageDiv.textContent || messageDiv.innerText)) {
+                    const contactBtn = createContactButton();
+                    messageDiv.appendChild(contactBtn);
+                }
+
                 // إضافة أزرار الإجراءات لرسائل الذكاء الاصطناعي
                 if (saveToHistory) {
                     const actionsDiv = document.createElement('div');
@@ -814,6 +863,32 @@
             }
         }
 
+        // التحقق مما إذا كان المستخدم يسأل عن التواصل مع المطور
+        function isAskingAboutContact(message) {
+            const contactKeywords = [
+                'تواصل', 'اتصال', 'رابط', 'للتواصل', 'للإتصال', 
+                'كيف أتواصل', 'أريد التواصل', 'أرغب في التواصل',
+                'رابط التواصل', 'رابط الاتصال', 'وسيلة تواصل',
+                'وسيلة اتصال', 'للحصول على', 'للتواصل مع', 'للإتصال ب',
+                'contact', 'communicate', 'reach', 'get in touch'
+            ];
+            
+            return contactKeywords.some(keyword => 
+                message.toLowerCase().includes(keyword.toLowerCase())
+            );
+        }
+
+        // إنشاء زر التواصل مع المطور
+        function createContactButton() {
+            const contactBtn = document.createElement('a');
+            contactBtn.href = DEVELOPER_CONTACT_URL;
+            contactBtn.target = '_blank';
+            contactBtn.className = 'contact-developer-btn';
+            contactBtn.innerHTML = '<i class="fas fa-comments"></i> تواصل مع المطور';
+            
+            return contactBtn;
+        }
+
         // عرض رسالة الحالة
         function showStatusMessage(message, type = 'info') {
             const statusDiv = document.createElement('div');
@@ -850,7 +925,7 @@
                     .map(msg => `${msg.role === 'user' ? 'المستخدم' : 'المساعد'}: ${msg.content.replace(/<[^>]*>/g, '')}`)
                     .join('\n');
                 
-                // تحديد ما إذا كان المستخدم يسأل عن المطور
+                // تحديد ما إذا كان المستخدم يسأل عن المطور أو التواصل
                 const isAskingAboutDeveloper = message.toLowerCase().includes('دعاء') || 
                                               message.toLowerCase().includes('مطور') || 
                                               message.toLowerCase().includes('برمج') || 
@@ -858,7 +933,18 @@
                                               message.toLowerCase().includes('ينشئ') ||
                                               message.toLowerCase().includes('ينشأ');
                 
+                const isAskingAboutContact = message.toLowerCase().includes('تواصل') || 
+                                            message.toLowerCase().includes('اتصال') || 
+                                            message.toLowerCase().includes('رابط') || 
+                                            message.toLowerCase().includes('للتواصل') ||
+                                            message.toLowerCase().includes('للإتصال');
+
                 // السياق المحسن مع ضمائر المذكر للمطور
+                let contactInfo = "";
+                if (isAskingAboutContact) {
+                    contactInfo = " يمكنك التواصل مع المطور Yacine-Dev من خلال الرابط المخصص للتواصل.";
+                }
+
                 const prompt = `أنت مساعدة ذكية باسم "لؤلؤة" مخصصة لمساعدة المستخدمة "دعاء". مطورك هو Yacine-Dev وهو رجل (استخدم ضمائر المذكر عند الحديث عنه: هو، قام، طور، إلخ).
 
 أنت مساعدة ذكية ومتخصصة تم تطويرك من قبل Yacine-Dev خصيصاً لخدمة المستخدمة دعاء ومساعدتها في مختلف المجالات.
@@ -867,6 +953,7 @@
 - لا تذكري أبداً أي معلومات عن منصة التطوير أو الشركة المطورة. 
 - لا تذكري جوجل أو جيميني أو أي منصة أخرى.
 - عند الحديث عن Yacine-Dev استخدمي ضمائر المذكر فقط (هو، قام، طور، إلخ)
+${contactInfo}
 
 السياق السابق:
 ${conversationContext}
