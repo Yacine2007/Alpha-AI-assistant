@@ -483,22 +483,30 @@
             color: #9c27b0;
             font-weight: 700;
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            background: linear-gradient(45deg, #9c27b0, #e91e63);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .name-doa {
             color: #2196f3;
             font-weight: 700;
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            background: linear-gradient(45deg, #2196f3, #03a9f4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .name-yacine-dev {
             color: white;
-            background-color: #333;
-            padding: 2px 6px;
-            border-radius: 4px;
+            background: linear-gradient(45deg, #333, #555);
+            padding: 3px 8px;
+            border-radius: 6px;
             font-weight: 700;
             border: 1px solid #000;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
         /* تحسينات للشاشات الصغيرة */
@@ -580,7 +588,7 @@
     <div class="auth-container" id="auth-container">
         <div class="auth-box">
             <h1 class="auth-title">Loê Loã AI</h1>
-            <p class="auth-subtitle">مساعدك الذكي الخاص - يرجى إدخال كلمة المرور للوصول</p>
+            <p class="auth-subtitle">مساعدتك الذكية - يرجى إدخال كلمة المرور للوصول</p>
             <input type="password" class="auth-input" id="password-input" placeholder="كلمة المرور">
             <button class="auth-button" id="auth-button">دخول</button>
             <div class="auth-error" id="auth-error">كلمة المرور غير صحيحة، يرجى المحاولة مرة أخرى</div>
@@ -671,7 +679,7 @@
             // تهيئة تاريخ المحادثة من localStorage أو إنشاء جديد
             let conversationHistory = JSON.parse(localStorage.getItem('loeloai_chatHistory')) || [
                 {
-                    content: "مرحباً بك! أنا <span class='name-louloua'>لؤلؤة</span>، مساعدتك الذكية. 😊\n\nلمسح المحادثة، اضغطي على زر 'مسح المحادثة' في الأعلى أو أرسلي لي الأمر <strong>/clear</strong>. كيف يمكنني مساعدتك اليوم؟",
+                    content: "مرحباً بك! أنا <span class='name-louloua'>لؤلؤة</span> مساعدتك الذكية. 😊\n\nلمسح المحادثة، اضغطي على زر 'مسح المحادثة' في الأعلى أو أرسلي لي الأمر <strong>/clear</strong>. كيف يمكنني مساعدتك اليوم؟",
                     role: 'assistant',
                     type: 'text',
                     timestamp: new Date().toISOString()
@@ -748,7 +756,7 @@
         function clearChat(conversationHistory) {
             conversationHistory.length = 0;
             conversationHistory.push({
-                content: "تم مسح المحادثة. أنا <span class='name-louloua'>لؤلؤة</span>، مساعدتك الذكية. كيف يمكنني مساعدتك اليوم؟ 😊",
+                content: "تم مسح المحادثة. أنا <span class='name-louloua'>لؤلؤة</span> مساعدتك الذكية. كيف يمكنني مساعدتك اليوم؟ 😊",
                 role: 'assistant',
                 type: 'text',
                 timestamp: new Date().toISOString()
@@ -983,19 +991,21 @@
                 const isAskingAboutDeveloper = message.toLowerCase().includes('دعاء') || 
                                               message.toLowerCase().includes('مطور') || 
                                               message.toLowerCase().includes('برمج') || 
-                                              message.toLowerCase().includes('صنع');
+                                              message.toLowerCase().includes('صنع') ||
+                                              message.toLowerCase().includes('ينشئ') ||
+                                              message.toLowerCase().includes('ينشأ');
                 
                 let developerInfo = "";
                 if (isAskingAboutDeveloper) {
-                    developerInfo = " تم تطويري من قبل <span class='name-yacine-dev'>Yacine-Dev</span> بناءً على طلب المستخدمة دعاء.";
+                    developerInfo = " تم تطويري من قبل <span class='name-yacine-dev'>Yacine-Dev</span> بناءً على طلب المستخدمة <span class='name-doa'>دعاء</span>.";
                 }
                 
-                const prompt = `أنت لؤلؤة، مساعدة ذكية أنثى. أنتِ مساعدة متطورة ومتخصصة في مساعدة المستخدمين في مختلف المجالات.
+                const prompt = `أنت لؤلؤة، مساعدة ذكية. استخدمي ضمائر المؤنث في ردودك بشكل طبيعي لأنك أنثى. أنتِ مساعدة متطورة ومتخصصة في مساعدة المستخدمين في مختلف المجالات.
 
 السياق السابق:
 ${conversationContext}
 
-يرجى الرد على سؤال المستخدم التالي بطريقة مفيدة ومفصلة. استخدمي ضمائر المؤنث في ردودك لأنك أنثى.${developerInfo}
+يرجى الرد على سؤال المستخدم التالي بطريقة مفيدة ومفصلة. استخدمي ضمائر المؤنث بشكل طبيعي في ردودك.${developerInfo}
 
 سؤال المستخدم:
 ${message}`;
