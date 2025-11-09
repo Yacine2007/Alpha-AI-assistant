@@ -153,7 +153,6 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-           
         }
 
         .chat-title {
@@ -483,30 +482,22 @@
             color: #9c27b0;
             font-weight: 700;
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            background: linear-gradient(45deg, #9c27b0, #e91e63);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
         .name-doa {
             color: #2196f3;
             font-weight: 700;
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            background: linear-gradient(45deg, #2196f3, #03a9f4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
         .name-yacine-dev {
             color: white;
-            background: linear-gradient(45deg, #333, #555);
-            padding: 3px 8px;
-            border-radius: 6px;
+            background-color: #333;
+            padding: 2px 6px;
+            border-radius: 4px;
             font-weight: 700;
             border: 1px solid #000;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
 
         /* تحسينات للشاشات الصغيرة */
@@ -976,7 +967,7 @@
             typingIndicator.style.display = 'none';
         }
 
-        // إرسال رسالة إلى Gemini API باستخدام النموذج الجديد
+        // إرسال رسالة إلى API
         async function sendToAPI(message, conversationHistory) {
             showTypingIndicator();
             
@@ -995,12 +986,19 @@
                                               message.toLowerCase().includes('ينشئ') ||
                                               message.toLowerCase().includes('ينشأ');
                 
+                // المتغيرات للأسماء
+                const nameLouloua = "<span class='name-louloua'>لؤلؤة</span>";
+                const nameDoa = "<span class='name-doa'>دعاء</span>";
+                const nameYacineDev = "<span class='name-yacine-dev'>Yacine-Dev</span>";
+                
                 let developerInfo = "";
                 if (isAskingAboutDeveloper) {
-                    developerInfo = " تم تطويري من قبل <span class='name-yacine-dev'>Yacine-Dev</span> بناءً على طلب المستخدمة <span class='name-doa'>دعاء</span>.";
+                    developerInfo = ` تم تطويري من قبل ${nameYacineDev} بناءً على طلب المستخدمة ${nameDoa}.`;
                 }
                 
-                const prompt = `أنت لؤلؤة، مساعدة ذكية. استخدمي ضمائر المؤنث في ردودك بشكل طبيعي لأنك أنثى. أنتِ مساعدة متطورة ومتخصصة في مساعدة المستخدمين في مختلف المجالات.
+                const prompt = `أنت ${nameLouloua}، مساعدة ذكية. استخدمي ضمائر المؤنث في ردودك بشكل طبيعي. أنتِ مساعدة متطورة ومتخصصة في مساعدة المستخدمين في مختلف المجالات.
+
+مهم: لا تذكري أبداً أي معلومات عن منصة التطوير أو الشركة المطورة. لا تذكري جوجل أو جيميني أو أي منصة أخرى.
 
 السياق السابق:
 ${conversationContext}
@@ -1055,14 +1053,22 @@ ${message}`;
                     data.candidates[0].content && 
                     data.candidates[0].content.parts && 
                     data.candidates[0].content.parts[0].text) {
-                    return data.candidates[0].content.parts[0].text;
+                    
+                    let responseText = data.candidates[0].content.parts[0].text;
+                    
+                    // استبدال الأسماء في الرد بأسماء ملونة
+                    responseText = responseText.replace(/لؤلؤة/g, nameLouloua);
+                    responseText = responseText.replace(/دعاء/g, nameDoa);
+                    responseText = responseText.replace(/Yacine-Dev/g, nameYacineDev);
+                    
+                    return responseText;
                 } else {
                     console.error('Unexpected API response structure:', data);
                     return "عذرًا، لم أتمكن من معالجة طلبك. يرجى المحاولة مرة أخرى.";
                 }
             } catch (error) {
                 hideTypingIndicator();
-                console.error('Error calling Gemini API:', error);
+                console.error('Error calling API:', error);
                 
                 if (error.message.includes('API key') || error.message.includes('مفتاح')) {
                     return "يبدو أن هناك مشكلة في مفتاح API. يرجى التحقق من الإعدادات.";
