@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loê Loã AI</title>
+    <title>Yakota Mb AI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -153,7 +153,6 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-           
         }
 
         .chat-title {
@@ -267,6 +266,29 @@
 
         .action-btn i {
             font-size: 0.9rem;
+        }
+
+        .contact-btn {
+            background: var(--gradient-pink);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 0.75rem;
+            text-decoration: none;
+            width: fit-content;
+        }
+
+        .contact-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 0, 91, 0.3);
         }
 
         .input-container {
@@ -479,13 +501,13 @@
         }
 
         /* تنسيقات الأسماء المميزة */
-        .name-louloua {
+        .name-yakota {
             color: #9c27b0;
             font-weight: 700;
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
-        .name-doa {
+        .name-ikhlas {
             color: #2196f3;
             font-weight: 700;
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
@@ -579,8 +601,8 @@
     <!-- شاشة التحقق بكلمة المرور -->
     <div class="auth-container" id="auth-container">
         <div class="auth-box">
-            <h1 class="auth-title">Loê Loã AI</h1>
-            <p class="auth-subtitle">مساعدك الذكي الخاص - يرجى إدخال كلمة المرور للوصول</p>
+            <h1 class="auth-title">Yakota Mb AI</h1>
+            <p class="auth-subtitle">مساعدتك الذكية - يرجى إدخال كلمة المرور للوصول</p>
             <input type="password" class="auth-input" id="password-input" placeholder="كلمة المرور">
             <button class="auth-button" id="auth-button">دخول</button>
             <div class="auth-error" id="auth-error">كلمة المرور غير صحيحة، يرجى المحاولة مرة أخرى</div>
@@ -591,7 +613,7 @@
     <div class="chat-container" id="chat-container" style="display: none;">
         <div class="chat-header">
             <div class="chat-title">
-                <span>Loê Loã AI - مساعدتك الذكية</span>
+                <span>Yakota Mb AI - مساعدتك الذكية</span>
             </div>
             <button class="clear-btn" id="clear-button">
                 <i class="fas fa-trash-alt"></i>
@@ -613,7 +635,7 @@
 
         <div class="input-container">
             <div class="input-wrapper">
-                <textarea id="user-input" placeholder="إسألي Loê Loã AI أي شيئ..." autocomplete="off" rows="1"></textarea>
+                <textarea id="user-input" placeholder="إسألي Yakota Mb AI أي شيئ..." autocomplete="off" rows="1"></textarea>
                 <button id="send-button" title="إرسال الرسالة">
                     <i class="fas fa-paper-plane"></i>
                 </button>
@@ -669,9 +691,9 @@
         // تهيئة المحادثة
         function initializeChat() {
             // تهيئة تاريخ المحادثة من localStorage أو إنشاء جديد
-            let conversationHistory = JSON.parse(localStorage.getItem('loeloai_chatHistory')) || [
+            let conversationHistory = JSON.parse(localStorage.getItem('yakotamb_chatHistory')) || [
                 {
-                    content: "مرحباً بك! أنا <span class='name-louloua'>لؤلؤة</span>، مساعدتك الذكية. 😊\n\nلمسح المحادثة، اضغطي على زر 'مسح المحادثة' في الأعلى أو أرسلي لي الأمر <strong>/clear</strong>. كيف يمكنني مساعدتك اليوم؟",
+                    content: "مرحباً بك! أنا <span class='name-yakota'>Yakota Mb</span> مساعدتك الذكية. 😊\n\nلمسح المحادثة، اضغطي على زر 'مسح المحادثة' في الأعلى أو أرسلي لي الأمر <strong>/clear</strong>. كيف يمكنني مساعدتك اليوم؟",
                     role: 'assistant',
                     type: 'text',
                     timestamp: new Date().toISOString()
@@ -741,14 +763,14 @@
 
         // حفظ المحادثة
         function saveConversation(conversationHistory) {
-            localStorage.setItem('loeloai_chatHistory', JSON.stringify(conversationHistory));
+            localStorage.setItem('yakotamb_chatHistory', JSON.stringify(conversationHistory));
         }
 
         // مسح المحادثة
         function clearChat(conversationHistory) {
             conversationHistory.length = 0;
             conversationHistory.push({
-                content: "تم مسح المحادثة. أنا <span class='name-louloua'>لؤلؤة</span>، مساعدتك الذكية. كيف يمكنني مساعدتك اليوم؟ 😊",
+                content: "تم مسح المحادثة. أنا <span class='name-yakota'>Yakota Mb</span> مساعدتك الذكية. كيف يمكنني مساعدتك اليوم؟ 😊",
                 role: 'assistant',
                 type: 'text',
                 timestamp: new Date().toISOString()
@@ -769,45 +791,18 @@
             messageDiv.classList.add(isUser ? 'user-message' : 'ai-message');
 
             if (!isUser) {
-                // معالجة ردود الذكاء الاصطناعي للتنسيق الغني
-                const parts = content.split(/(```[\s\S]*?```|\[IMAGE\][\s\S]*?\[\/IMAGE\]|\*\*.*?\*\*|\[ADDRESS\].*?\[\/ADDRESS\])/);
+                // استخدام innerHTML لعرض HTML بشكل صحيح
+                messageDiv.innerHTML = content.replace(/\n/g, '<br>');
 
-                parts.forEach(part => {
-                    if (!part || part.trim() === '') return;
-
-                    if (part.startsWith('```') && part.endsWith('```')) {
-                        // كتل الكود
-                        const langMatch = part.match(/^```(\w+)/);
-                        const language = langMatch ? langMatch[1] : '';
-                        const codeContent = part.replace(/^```[\w]*\n/, '').replace(/```$/, '');
-                        messageDiv.appendChild(createCodeBlock(codeContent, language));
-                    } 
-                    else if (part.startsWith('[IMAGE]') && part.endsWith('[/IMAGE]')) {
-                        // عنصر نائب للصورة
-                        const imageDesc = part.replace('[IMAGE]', '').replace('[/IMAGE]', '');
-                        messageDiv.appendChild(createImagePlaceholder(imageDesc));
-                    }
-                    else if (part.startsWith('**') && part.endsWith('**')) {
-                        // نص عريض
-                        const boldText = document.createElement('span');
-                        boldText.className = 'bold-text';
-                        boldText.textContent = part.slice(2, -2);
-                        messageDiv.appendChild(boldText);
-                    }
-                    else if (part.startsWith('[ADDRESS]') && part.endsWith('[/ADDRESS]')) {
-                        // نص العنوان
-                        const addressText = document.createElement('span');
-                        addressText.className = 'address-text';
-                        addressText.textContent = part.replace('[ADDRESS]', '').replace('[/ADDRESS]', '');
-                        messageDiv.appendChild(addressText);
-                    }
-                    else {
-                        // نص عادي مع فواصل الأسطر
-                        const textPart = document.createElement('span');
-                        textPart.innerHTML = part.replace(/\n/g, '<br>');
-                        messageDiv.appendChild(textPart);
-                    }
-                });
+                // إضافة زر التواصل إذا كان الرد يحتوي على معرفة خاصة
+                if (content.includes('contact-button')) {
+                    const contactBtn = document.createElement('a');
+                    contactBtn.href = 'https://yacine2007.github.io/Yacine2007/communication.html';
+                    contactBtn.target = '_blank';
+                    contactBtn.className = 'contact-btn';
+                    contactBtn.innerHTML = '<i class="fas fa-comments"></i> تواصل مع المطور';
+                    messageDiv.appendChild(contactBtn);
+                }
 
                 // إضافة أزرار الإجراءات لرسائل الذكاء الاصطناعي
                 if (saveToHistory) {
@@ -818,7 +813,9 @@
                     copyBtn.className = 'action-btn copy-response-btn';
                     copyBtn.innerHTML = '<i class="far fa-copy"></i> نسخ';
                     copyBtn.addEventListener('click', () => {
-                        navigator.clipboard.writeText(content);
+                        // نسخ النص بدون HTML
+                        const plainText = content.replace(/<[^>]*>/g, '');
+                        navigator.clipboard.writeText(plainText);
                         showStatusMessage('تم النسخ إلى الحافظة!', 'success');
                         copyBtn.innerHTML = '<i class="fas fa-check"></i> تم النسخ!';
                         setTimeout(() => {
@@ -850,99 +847,6 @@
             }
         }
 
-        // إنشاء كتلة كود
-        function createCodeBlock(content, language = '') {
-            const codeBlock = document.createElement('div');
-            codeBlock.className = 'code-block';
-            
-            const header = document.createElement('div');
-            header.className = 'code-header';
-            
-            const langSpan = document.createElement('span');
-            langSpan.textContent = language || 'كود';
-            
-            const copyBtn = document.createElement('button');
-            copyBtn.className = 'copy-btn';
-            copyBtn.innerHTML = '<i class="far fa-copy"></i> نسخ';
-            copyBtn.addEventListener('click', () => {
-                navigator.clipboard.writeText(content);
-                showStatusMessage('تم نسخ الكود!', 'success');
-                copyBtn.innerHTML = '<i class="fas fa-check"></i> تم النسخ!';
-                setTimeout(() => {
-                    copyBtn.innerHTML = '<i class="far fa-copy"></i> نسخ';
-                }, 2000);
-            });
-            
-            header.appendChild(langSpan);
-            header.appendChild(copyBtn);
-            
-            const codeContent = document.createElement('pre');
-            codeContent.className = 'code-content';
-            codeContent.innerHTML = highlightSyntax(content, language);
-            
-            codeBlock.appendChild(header);
-            codeBlock.appendChild(codeContent);
-            
-            return codeBlock;
-        }
-
-        // تمييز الصيغة
-        function highlightSyntax(code, language = '') {
-            // تهريب الأحرف الخاصة في HTML
-            let escapedCode = code
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/\t/g, "    ");
-
-            // الأنماط الشائعة عبر اللغات
-            escapedCode = escapedCode
-                .replace(/\b(function|if|else|for|while|return|let|const|var|class|import|from|def|try|except|async|await|export|switch|case|default|break|continue)\b/g, 
-                        '<span class="code-keyword">$&</span>')
-                .replace(/\b(console\.log|print|document\.\w+|window\.\w+)\b/g, 
-                        '<span class="code-function">$&</span>')
-                .replace(/(".*?"|'.*?'|`.*?`)/g, 
-                        '<span class="code-string">$&</span>')
-                .replace(/\/\/.*?$|\/\*[\s\S]*?\*\/|#.*$/gm, 
-                        '<span class="code-comment">$&</span>')
-                .replace(/\b(\d+\.?\d*)\b/g, 
-                        '<span class="code-number">$&</span>')
-                .replace(/(==|===|!=|!==|=|\+|-|\*|\/|%|&&|\|\||!|\(|\)|{|}|\[|\]|;|,|\.|:|=>|->|\|\>|&lt;|&gt;)/g, 
-                        '<span class="code-operator">$&</span>');
-
-            // الأنماط الخاصة باللغة
-            if (language === 'python') {
-                escapedCode = escapedCode
-                    .replace(/\b(True|False|None|and|or|not|def|class|lambda|with|as|from|import|try|except|finally|raise)\b/g,
-                            '<span class="code-keyword">$&</span>');
-            } else if (language === 'javascript' || language === 'js') {
-                escapedCode = escapedCode
-                    .replace(/\b(const|let|var|function|this|new|typeof|instanceof|in|of|extends|super)\b/g,
-                            '<span class="code-keyword">$&</span>')
-                    .replace(/\b(Array|String|Number|Object|Boolean|Date|Math|JSON|Promise|Symbol|Set|Map)\b/g,
-                            '<span class="code-type">$&</span>');
-            }
-
-            return escapedCode;
-        }
-
-        // إنشاء عنصر نائب للصورة
-        function createImagePlaceholder(description) {
-            const placeholder = document.createElement('div');
-            placeholder.className = 'image-placeholder';
-            
-            const icon = document.createElement('i');
-            icon.className = 'fas fa-image';
-            
-            const desc = document.createElement('div');
-            desc.textContent = description || 'وصف الصورة';
-            
-            placeholder.appendChild(icon);
-            placeholder.appendChild(desc);
-            
-            return placeholder;
-        }
-
         // عرض رسالة الحالة
         function showStatusMessage(message, type = 'info') {
             const statusDiv = document.createElement('div');
@@ -968,7 +872,7 @@
             typingIndicator.style.display = 'none';
         }
 
-        // إرسال رسالة إلى Gemini API باستخدام النموذج الجديد
+        // إرسال رسالة إلى API
         async function sendToAPI(message, conversationHistory) {
             showTypingIndicator();
             
@@ -983,21 +887,32 @@
                 const isAskingAboutDeveloper = message.toLowerCase().includes('دعاء') || 
                                               message.toLowerCase().includes('مطور') || 
                                               message.toLowerCase().includes('برمج') || 
-                                              message.toLowerCase().includes('صنع');
+                                              message.toLowerCase().includes('صنع') ||
+                                              message.toLowerCase().includes('ينشئ') ||
+                                              message.toLowerCase().includes('ينشأ') ||
+                                              message.toLowerCase().includes('تواصل') ||
+                                              message.toLowerCase().includes('اتصال') ||
+                                              message.toLowerCase().includes('اتصل') ||
+                                              message.toLowerCase().includes('رابط') ||
+                                              message.toLowerCase().includes('للتواصل');
                 
-                let developerInfo = "";
-                if (isAskingAboutDeveloper) {
-                    developerInfo = " تم تطويري من قبل <span class='name-yacine-dev'>Yacine-Dev</span> بناءً على طلب المستخدمة دعاء.";
-                }
-                
-                const prompt = `أنت لؤلؤة، مساعدة ذكية أنثى. أنتِ مساعدة متطورة ومتخصصة في مساعدة المستخدمين في مختلف المجالات.
+                // السياق المحسن مع ضمائر المذكر للمطور
+                const prompt = `أنت مساعدة ذكية باسم "Yakota Mb" مخصصة لمساعدة المستخدمة "إخلاص". مطورك هو Yacine-Dev وهو رجل (استخدم ضمائر المذكر عند الحديث عنه: هو، قام، طور، إلخ).
+
+أنت مساعدة ذكية ومتخصصة تم تطويرك من قبل Yacine-Dev خصيصاً لخدمة المستخدمة إخلاص ومساعدتها في مختلف المجالات.
+
+مهم: 
+- لا تذكري أبداً أي معلومات عن منصة التطوير أو الشركة المطورة. 
+- لا تذكري جوجل أو جيميني أو أي منصة أخرى.
+- عند الحديث عن Yacine-Dev استخدمي ضمائر المذكر فقط (هو، قام، طور، إلخ)
+- إذا سألتك إخلاص عن كيفية التواصل مع المطور، قدمي لها رابط التواصل التالي: https://yacine2007.github.io/Yacine2007/communication.html وأضيفي العلامة الخاصة contact-button في نهاية ردك.
 
 السياق السابق:
 ${conversationContext}
 
-يرجى الرد على سؤال المستخدم التالي بطريقة مفيدة ومفصلة. استخدمي ضمائر المؤنث في ردودك لأنك أنثى.${developerInfo}
+يرجى الرد على سؤال المستخدمة إخلاص التالي بطريقة مفيدة ومفصلة. استخدمي ضمائر المؤنث بشكل طبيعي في ردودك عن نفسك، وضمائر المذكر عند الحديث عن المطور Yacine-Dev.
 
-سؤال المستخدم:
+سؤال المستخدمة:
 ${message}`;
 
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`, {
@@ -1045,14 +960,22 @@ ${message}`;
                     data.candidates[0].content && 
                     data.candidates[0].content.parts && 
                     data.candidates[0].content.parts[0].text) {
-                    return data.candidates[0].content.parts[0].text;
+                    
+                    let responseText = data.candidates[0].content.parts[0].text;
+                    
+                    // استبدال الأسماء في الرد بأسماء ملونة
+                    responseText = responseText.replace(/Yakota Mb/g, "<span class='name-yakota'>Yakota Mb</span>");
+                    responseText = responseText.replace(/إخلاص/g, "<span class='name-ikhlas'>إخلاص</span>");
+                    responseText = responseText.replace(/Yacine-Dev/g, "<span class='name-yacine-dev'>Yacine-Dev</span>");
+                    
+                    return responseText;
                 } else {
                     console.error('Unexpected API response structure:', data);
                     return "عذرًا، لم أتمكن من معالجة طلبك. يرجى المحاولة مرة أخرى.";
                 }
             } catch (error) {
                 hideTypingIndicator();
-                console.error('Error calling Gemini API:', error);
+                console.error('Error calling API:', error);
                 
                 if (error.message.includes('API key') || error.message.includes('مفتاح')) {
                     return "يبدو أن هناك مشكلة في مفتاح API. يرجى التحقق من الإعدادات.";
