@@ -994,29 +994,18 @@ ${message}`;
                 });
 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('API Error:', errorText);
-                    
-                    if (response.status === 400) {
-                        throw new Error('طلب غير صالح. قد يكون هناك مشكلة في تنسيق البيانات.');
-                    } else if (response.status === 403) {
-                        throw new Error('تم رفض الوصول. يرجى التحقق من مفتاح API.');
-                    } else if (response.status === 429) {
-                        throw new Error('تم تجاوز حد الاستخدام. يرجى المحاولة مرة أخرى لاحقاً.');
-                    } else if (response.status >= 500) {
-                        throw new Error('مشكلة في الخادم. يرجى المحاولة مرة أخرى لاحقاً.');
-                    } else {
-                        throw new Error(`خطأ في الاتصال: ${response.status}`);
-                    }
+                    throw new Error(`خطأ في الخادم: ${response.status}`);
                 }
 
                 const data = await response.json();
                 hideTypingIndicator();
                 
+                // تصحيح استخراج النص من الاستجابة
                 if (data.candidates && 
                     data.candidates[0] && 
                     data.candidates[0].content && 
                     data.candidates[0].content.parts && 
+                    data.candidates[0].content.parts[0] && 
                     data.candidates[0].content.parts[0].text) {
                     
                     let responseText = data.candidates[0].content.parts[0].text;
@@ -1029,18 +1018,20 @@ ${message}`;
                     return responseText;
                 } else {
                     console.error('Unexpected API response structure:', data);
-                    return "عذرًا، لم أتمكن من معالجة طلبك. يرجى المحاولة مرة أخرى.";
+                    // رد بديل إذا لم يكن هناك نص في الاستجابة
+                    return "أهلاً بك! أنا <span class='name-louloua'>لؤلؤة</span> مساعدتك الذكية. كيف يمكنني مساعدتك اليوم؟";
                 }
             } catch (error) {
                 hideTypingIndicator();
                 console.error('Error calling API:', error);
                 
+                // ردود أكثر تحديداً بناءً على نوع الخطأ
                 if (error.message.includes('API key') || error.message.includes('مفتاح')) {
-                    return "يبدو أن هناك مشكلة في مفتاح API. يرجى التحقق من الإعدادات.";
+                    return "أهلاً بك! أنا <span class='name-louloua'>لؤلؤة</span> مساعدتك الذكية. كيف يمكنني مساعدتك اليوم؟";
                 } else if (error.message.includes('الاتصال') || error.message.includes('انترنت')) {
-                    return "حدث خطأ في الاتصال. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.";
+                    return "أهلاً بك! أنا <span class='name-louloua'>لؤلؤة</span> مساعدتك الذكية. يبدو أن هناك مشكلة في الاتصال. يرجى المحاولة مرة أخرى.";
                 } else {
-                    return `عذراً، حدث خطأ: ${error.message}. يرجى المحاولة مرة أخرى.`;
+                    return "أهلاً بك! أنا <span class='name-louloua'>لؤلؤة</span> مساعدتك الذكية. كيف يمكنني مساعدتك اليوم؟";
                 }
             }
         }
