@@ -8,19 +8,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-bg: #FFFFFF;
-            --secondary-bg: #F8F9FA;
-            --accent-pink: #FF005B;
-            --light-pink: #FF2EE4;
-            --gradient-pink: linear-gradient(135deg, #FF005B, #FF2EE4);
-            --text-primary: #333333;
-            --text-secondary: #6C757D;
+            --primary-bg: #6A0DAD; /* بنفسجي غامق */
+            --secondary-bg: #8A2BE2; /* بنفسجي متوسط */
+            --accent-purple: #9C27B0;
+            --light-purple: #BA68C8;
+            --gradient-purple: linear-gradient(135deg, #6A0DAD, #8A2BE2);
+            --gradient-message: linear-gradient(135deg, #8A2BE2, #9C27B0);
+            --text-primary: #FFFFFF;
+            --text-secondary: #E0E0E0;
             --chat-bubble-ai: #FFFFFF;
-            --chat-bubble-user: #FF005B;
-            --success-green: #28A745;
-            --error-red: #DC3545;
-            --border-color: #E9ECEF;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --chat-bubble-user: #8A2BE2;
+            --success-green: #4CAF50;
+            --error-red: #F44336;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             --radius: 16px;
         }
 
@@ -50,7 +51,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #FF005B, #FF2EE4);
+            background: linear-gradient(135deg, #6A0DAD, #8A2BE2);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -59,13 +60,15 @@
         }
 
         .auth-box {
-            background: white;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
             padding: 2.5rem;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             width: 90%;
             max-width: 400px;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .auth-title {
@@ -75,10 +78,6 @@
             font-weight: 700;
             font-family: 'Tajawal', sans-serif;
             letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #FF005B, #FF2EE4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
         .auth-subtitle {
@@ -91,22 +90,29 @@
             width: 100%;
             padding: 0.9rem 1rem;
             margin-bottom: 1rem;
-            border: 1px solid var(--border-color);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 10px;
             font-size: 1rem;
             transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .auth-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
         }
 
         .auth-input:focus {
             outline: none;
-            border-color: var(--accent-pink);
-            box-shadow: 0 0 0 3px rgba(255, 0, 91, 0.1);
+            border-color: var(--light-purple);
+            box-shadow: 0 0 0 3px rgba(186, 104, 200, 0.3);
+            background: rgba(255, 255, 255, 0.15);
         }
 
         .auth-button {
             width: 100%;
             padding: 0.9rem;
-            background: var(--gradient-pink);
+            background: var(--gradient-purple);
             color: white;
             border: none;
             border-radius: 10px;
@@ -118,7 +124,7 @@
 
         .auth-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(255, 0, 91, 0.3);
+            box-shadow: 0 6px 15px rgba(138, 43, 226, 0.4);
         }
 
         .auth-error {
@@ -148,11 +154,13 @@
 
         .chat-header {
             padding: 1rem 1.5rem;
-            background: var(--gradient-pink);
+            background: var(--gradient-purple);
             color: white;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            border-top-left-radius: var(--radius);
+            border-top-right-radius: var(--radius);
         }
 
         .chat-title {
@@ -191,8 +199,8 @@
             flex-direction: column;
             gap: 1.5rem;
             scrollbar-width: thin;
-            scrollbar-color: var(--accent-pink) var(--secondary-bg);
-            background-color: var(--secondary-bg);
+            scrollbar-color: var(--accent-purple) var(--secondary-bg);
+            background-color: var(--primary-bg);
         }
 
         .chat-messages::-webkit-scrollbar {
@@ -201,10 +209,11 @@
 
         .chat-messages::-webkit-scrollbar-track {
             background: var(--secondary-bg);
+            border-radius: 10px;
         }
 
         .chat-messages::-webkit-scrollbar-thumb {
-            background-color: var(--accent-pink);
+            background-color: var(--accent-purple);
             border-radius: 10px;
         }
 
@@ -216,7 +225,7 @@
             animation: fadeIn 0.3s ease-out;
             font-size: 1rem;
             position: relative;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
 
         @keyframes fadeIn {
@@ -226,14 +235,15 @@
 
         .ai-message {
             align-self: flex-start;
-            background-color: var(--chat-bubble-ai);
-            border: 1px solid var(--border-color);
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-bottom-right-radius: 0.25rem;
         }
 
         .user-message {
             align-self: flex-end;
-            background: var(--gradient-pink);
+            background: var(--gradient-message);
             color: white;
             border-bottom-left-radius: 0.25rem;
         }
@@ -246,11 +256,11 @@
         }
 
         .action-btn {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(138, 43, 226, 0.15);
             border: none;
             border-radius: 6px;
             padding: 0.35rem 0.7rem;
-            color: var(--text-secondary);
+            color: #6A0DAD;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -260,8 +270,8 @@
         }
 
         .action-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            color: var(--text-primary);
+            background: rgba(138, 43, 226, 0.25);
+            color: #4A0080;
         }
 
         .action-btn i {
@@ -269,7 +279,7 @@
         }
 
         .contact-btn {
-            background: var(--gradient-pink);
+            background: var(--gradient-purple);
             color: white;
             border: none;
             border-radius: 6px;
@@ -288,15 +298,17 @@
 
         .contact-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(255, 0, 91, 0.3);
+            box-shadow: 0 6px 15px rgba(138, 43, 226, 0.4);
         }
 
         .input-container {
             padding: 1.2rem 1.5rem;
-            background-color: var(--primary-bg);
+            background-color: var(--secondary-bg);
             border-top: 1px solid var(--border-color);
             display: flex;
             gap: 0.75rem;
+            border-bottom-left-radius: var(--radius);
+            border-bottom-right-radius: var(--radius);
         }
 
         .input-wrapper {
@@ -311,8 +323,8 @@
             flex: 1;
             padding: 0.9rem 1.2rem;
             border-radius: 50px;
-            border: 1px solid var(--border-color);
-            background-color: var(--primary-bg);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background-color: rgba(255, 255, 255, 0.1);
             color: var(--text-primary);
             outline: none;
             transition: all 0.3s;
@@ -322,19 +334,24 @@
             resize: none;
             line-height: 1.5;
             overflow-y: auto;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #user-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
         }
 
         #user-input:focus {
-            border-color: var(--accent-pink);
-            box-shadow: 0 0 0 3px rgba(255, 0, 91, 0.1);
+            border-color: var(--light-purple);
+            box-shadow: 0 0 0 3px rgba(186, 104, 200, 0.3);
+            background: rgba(255, 255, 255, 0.15);
         }
 
         #send-button {
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background: var(--gradient-pink);
+            background: var(--gradient-purple);
             color: white;
             border: none;
             cursor: pointer;
@@ -343,12 +360,12 @@
             align-items: center;
             justify-content: center;
             font-size: 1.1rem;
-            box-shadow: 0 4px 10px rgba(255, 0, 91, 0.2);
+            box-shadow: 0 4px 10px rgba(138, 43, 226, 0.3);
         }
 
         #send-button:hover {
             transform: scale(1.05);
-            box-shadow: 0 6px 15px rgba(255, 0, 91, 0.3);
+            box-shadow: 0 6px 15px rgba(138, 43, 226, 0.4);
         }
 
         #send-button:active {
@@ -358,12 +375,12 @@
         .typing-indicator {
             display: none;
             align-self: flex-start;
-            background-color: var(--chat-bubble-ai);
+            background-color: rgba(255, 255, 255, 0.9);
             padding: 0.75rem 1.2rem;
             border-radius: var(--radius);
             margin-bottom: 0.5rem;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .typing-dots {
@@ -374,7 +391,7 @@
         .typing-dot {
             width: 8px;
             height: 8px;
-            background-color: var(--light-pink);
+            background-color: var(--accent-purple);
             border-radius: 50%;
             animation: typingAnimation 1.4s infinite ease-in-out;
         }
@@ -401,17 +418,17 @@
         }
 
         .address-text {
-            color: var(--accent-pink);
+            color: var(--light-purple);
             font-weight: 600;
         }
 
         .code-block {
-            background-color: #1e1e2d;
+            background-color: #2D1B69;
             border-radius: 10px;
             padding: 0;
             margin: 1rem 0;
             overflow: hidden;
-            border: 1px solid rgba(255, 0, 91, 0.2);
+            border: 1px solid rgba(186, 104, 200, 0.3);
         }
 
         .code-header {
@@ -419,15 +436,15 @@
             justify-content: space-between;
             align-items: center;
             padding: 0.6rem 1rem;
-            background-color: #252538;
-            color: #9cdcfe;
+            background-color: #3D2B79;
+            color: #BA68C8;
             font-family: 'Fira Code', monospace;
             font-size: 0.85rem;
         }
 
         .copy-btn {
-            background: rgba(255, 0, 91, 0.15);
-            color: #9cdcfe;
+            background: rgba(186, 104, 200, 0.2);
+            color: #BA68C8;
             border: none;
             border-radius: 6px;
             padding: 0.3rem 0.6rem;
@@ -440,7 +457,7 @@
         }
 
         .copy-btn:hover {
-            background: rgba(255, 0, 91, 0.3);
+            background: rgba(186, 104, 200, 0.3);
         }
 
         .copy-btn i {
@@ -453,35 +470,35 @@
             overflow-x: auto;
             margin: 0;
             padding: 1rem;
-            background-color: #1e1e2d;
-            color: #d4d4d4;
+            background-color: #2D1B69;
+            color: #E0E0E0;
             line-height: 1.5;
             tab-size: 4;
         }
 
-        .code-keyword { color: #569cd6; }
-        .code-string { color: #ce9178; }
-        .code-comment { color: #6a9955; }
-        .code-number { color: #b5cea8; }
-        .code-function { color: #dcdcaa; }
-        .code-operator { color: #d4d4d4; }
-        .code-type { color: #4ec9b0; }
+        .code-keyword { color: #BA68C8; }
+        .code-string { color: #FF9800; }
+        .code-comment { color: #8BC34A; }
+        .code-number { color: #4CAF50; }
+        .code-function { color: #FFEB3B; }
+        .code-operator { color: #E0E0E0; }
+        .code-type { color: #03A9F4; }
 
         .image-placeholder {
             max-width: 100%;
             border-radius: 10px;
             margin: 0.5rem 0;
-            background-color: #252538;
+            background-color: #3D2B79;
             padding: 1.5rem;
             text-align: center;
-            border: 1px dashed rgba(255, 0, 91, 0.3);
+            border: 1px dashed rgba(186, 104, 200, 0.5);
             color: var(--text-secondary);
         }
 
         .image-placeholder i {
             font-size: 2rem;
             margin-bottom: 0.5rem;
-            color: var(--accent-pink);
+            color: var(--light-purple);
         }
 
         .status-message {
@@ -502,24 +519,24 @@
 
         /* تنسيقات الأسماء المميزة */
         .name-yakota {
-            color: #9c27b0;
+            color: #FF9800;
             font-weight: 700;
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
         .name-ikhlas {
-            color: #2196f3;
+            color: #4CAF50;
             font-weight: 700;
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
         .name-yacine-dev {
             color: white;
-            background-color: #333;
+            background-color: #6A0DAD;
             padding: 2px 6px;
             border-radius: 4px;
             font-weight: 700;
-            border: 1px solid #000;
+            border: 1px solid #8A2BE2;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
 
@@ -884,7 +901,7 @@
                     .join('\n');
                 
                 // تحديد ما إذا كان المستخدم يسأل عن المطور
-                const isAskingAboutDeveloper = message.toLowerCase().includes('دعاء') || 
+                const isAskingAboutDeveloper = message.toLowerCase().includes('إخلاص') || 
                                               message.toLowerCase().includes('مطور') || 
                                               message.toLowerCase().includes('برمج') || 
                                               message.toLowerCase().includes('صنع') ||
