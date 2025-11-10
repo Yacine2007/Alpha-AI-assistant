@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loê Loã AI</title>
+    <title>My Friend AI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -478,7 +478,7 @@
         }
 
         /* تنسيقات الأسماء المميزة */
-        .name-louloua {
+        .name-friend {
             color: #9c27b0;
             font-weight: 700;
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
@@ -620,8 +620,8 @@
     <!-- شاشة التحقق بكلمة المرور -->
     <div class="auth-container" id="auth-container">
         <div class="auth-box">
-            <h1 class="auth-title">Loê Loã AI</h1>
-            <p class="auth-subtitle">مساعدتك الذكية - يرجى إدخال كلمة المرور للوصول</p>
+            <h1 class="auth-title">My Friend AI</h1>
+            <p class="auth-subtitle">صديقتك الذكية - يرجى إدخال كلمة المرور للوصول</p>
             <input type="password" class="auth-input" id="password-input" placeholder="كلمة المرور">
             <button class="auth-button" id="auth-button">دخول</button>
             <div class="auth-error" id="auth-error">كلمة المرور غير صحيحة، يرجى المحاولة مرة أخرى</div>
@@ -632,7 +632,7 @@
     <div class="chat-container" id="chat-container" style="display: none;">
         <div class="chat-header">
             <div class="chat-title">
-                <span>Loê Loã AI - مساعدتك الذكية</span>
+                <span>My Friend AI - صديقتك الذكية</span>
             </div>
             <button class="clear-btn" id="clear-button">
                 <i class="fas fa-trash-alt"></i>
@@ -654,7 +654,7 @@
 
         <div class="input-container">
             <div class="input-wrapper">
-                <textarea id="user-input" placeholder="إسألي Loê Loã AI أي شيئ..." autocomplete="off" rows="1"></textarea>
+                <textarea id="user-input" placeholder="إسألي صديقتك الذكية أي شيئ..." autocomplete="off" rows="1"></textarea>
                 <button id="send-button" title="إرسال الرسالة">
                     <i class="fas fa-paper-plane"></i>
                 </button>
@@ -711,9 +711,9 @@
         // تهيئة المحادثة
         function initializeChat() {
             // تهيئة تاريخ المحادثة من localStorage أو إنشاء جديد
-            let conversationHistory = JSON.parse(localStorage.getItem('loeloai_chatHistory')) || [
+            let conversationHistory = JSON.parse(localStorage.getItem('myfriendai_chatHistory')) || [
                 {
-                    content: "مرحباً بك! أنا <span class='name-louloua'>لؤلؤة</span> مساعدتك الذكية. 😊\n\nلمسح المحادثة، اضغطي على زر 'مسح المحادثة' في الأعلى أو أرسلي لي الأمر <strong>/clear</strong>. كيف يمكنني مساعدتك اليوم؟",
+                    content: "مرحباً بك! أنا <span class='name-friend'>صديقتك الذكية</span>. 😊\n\nلمسح المحادثة، اضغطي على زر 'مسح المحادثة' في الأعلى أو أرسلي لي الأمر <strong>/clear</strong>. كيف يمكنني مساعدتك اليوم؟",
                     role: 'assistant',
                     type: 'text',
                     timestamp: new Date().toISOString()
@@ -783,14 +783,14 @@
 
         // حفظ المحادثة
         function saveConversation(conversationHistory) {
-            localStorage.setItem('loeloai_chatHistory', JSON.stringify(conversationHistory));
+            localStorage.setItem('myfriendai_chatHistory', JSON.stringify(conversationHistory));
         }
 
         // مسح المحادثة
         function clearChat(conversationHistory) {
             conversationHistory.length = 0;
             conversationHistory.push({
-                content: "تم مسح المحادثة. أنا <span class='name-louloua'>لؤلؤة</span> مساعدتك الذكية. كيف يمكنني مساعدتك اليوم؟ 😊",
+                content: "تم مسح المحادثة. أنا <span class='name-friend'>صديقتك الذكية</span>. كيف يمكنني مساعدتك اليوم؟ 😊",
                 role: 'assistant',
                 type: 'text',
                 timestamp: new Date().toISOString()
@@ -945,9 +945,9 @@
                     contactInfo = " يمكنك التواصل مع المطور Yacine-Dev من خلال الرابط المخصص للتواصل.";
                 }
 
-                const prompt = `أنت مساعدة ذكية باسم "لؤلؤة" مخصصة لمساعدة المستخدمة "دعاء". مطورك هو Yacine-Dev وهو رجل (استخدم ضمائر المذكر عند الحديث عنه: هو، قام، طور، إلخ).
+                const prompt = `أنت صديقة ذكية مخصصة لمساعدة المستخدمة "دعاء". مطورك هو Yacine-Dev وهو رجل (استخدم ضمائر المذكر عند الحديث عنه: هو، قام، طور، إلخ).
 
-أنت مساعدة ذكية ومتخصصة تم تطويرك من قبل Yacine-Dev خصيصاً لخدمة المستخدمة دعاء ومساعدتها في مختلف المجالات.
+أنت صديقة ذكية ومتخصصة تم تطويرك من قبل Yacine-Dev خصيصاً لخدمة المستخدمة دعاء ومساعدتها في مختلف المجالات.
 
 مهم جداً:
 - لا تذكري أبداً أي معلومات عن منصة التطوير أو الشركة المطورة. 
@@ -956,12 +956,13 @@
 - أنت مساعدة نصية فقط ولا تستطيعين إرسال رسائل أو فتح برامج أو تنفيذ أي إجراء خارجي.
 - إذا طلبت منك المستخدمة تنفيذ أي إجراء خارجي (مثل: إرسال رسالة، فتح برنامج، تنفيذ أمر، تحميل ملف، طباعة، إلخ) - ردي بإيجاز شديد: "عذراً، لا أستطيع تنفيذ هذا الطلب. أنا مساعدة نصية فقط ولا أستطيع إرسال رسائل أو فتح برامج أو تنفيذ أي إجراء خارجي."
 - لا تقدمي أي تفاصيل إضافية أو تفسيرات عند الرد على الطلبات الخارجية.
+- أجب باختصار ولا تطيلي في الرد. الردود المختصرة والمباشرة أفضل.
 ${contactInfo}
 
 السياق السابق:
 ${conversationContext}
 
-يرجى الرد على سؤال المستخدمة دعاء التالي بطريقة مفيدة ومفصلة. استخدمي ضمائر المؤنث بشكل طبيعي في ردودك عن نفسك، وضمائر المذكر عند الحديث عن المطور Yacine-Dev.
+يرجى الرد على سؤال المستخدمة دعاء التالي بطريقة مفيدة ومختصرة. استخدمي ضمائر المؤنث بشكل طبيعي في ردودك عن نفسك، وضمائر المذكر عند الحديث عن المطور Yacine-Dev.
 
 سؤال المستخدمة:
 ${message}`;
@@ -981,7 +982,7 @@ ${message}`;
                             temperature: 0.7,
                             topK: 40,
                             topP: 0.95,
-                            maxOutputTokens: 1000,
+                            maxOutputTokens: 500, // تقليل عدد الرموز لضمان الإيجاز
                         }
                     })
                 });
@@ -1004,7 +1005,7 @@ ${message}`;
                     let responseText = data.candidates[0].content.parts[0].text;
                     
                     // استبدال الأسماء في الرد بأسماء ملونة
-                    responseText = responseText.replace(/لؤلؤة/g, "<span class='name-louloua'>لؤلؤة</span>");
+                    responseText = responseText.replace(/صديقتك الذكية/g, "<span class='name-friend'>صديقتك الذكية</span>");
                     responseText = responseText.replace(/دعاء/g, "<span class='name-doa'>دعاء</span>");
                     responseText = responseText.replace(/Yacine-Dev/g, "<span class='name-yacine-dev'>Yacine-Dev</span>");
                     
@@ -1012,7 +1013,7 @@ ${message}`;
                 } else {
                     console.error('Unexpected API response structure:', data);
                     // رد بديل إذا لم يكن هناك نص في الاستجابة
-                    return "أهلاً بك! أنا <span class='name-louloua'>لؤلؤة</span> مساعدتك الذكية. كيف يمكنني مساعدتك اليوم؟";
+                    return "أهلاً بك! أنا <span class='name-friend'>صديقتك الذكية</span>. كيف يمكنني مساعدتك اليوم؟";
                 }
             } catch (error) {
                 hideTypingIndicator();
@@ -1020,11 +1021,11 @@ ${message}`;
                 
                 // ردود أكثر تحديداً بناءً على نوع الخطأ
                 if (error.message.includes('API key') || error.message.includes('مفتاح')) {
-                    return "أهلاً بك! أنا <span class='name-louloua'>لؤلؤة</span> مساعدتك الذكية. كيف يمكنني مساعدتك اليوم؟";
+                    return "أهلاً بك! أنا <span class='name-friend'>صديقتك الذكية</span>. كيف يمكنني مساعدتك اليوم؟";
                 } else if (error.message.includes('الاتصال') || error.message.includes('انترنت')) {
-                    return "أهلاً بك! أنا <span class='name-louloua'>لؤلؤة</span> مساعدتك الذكية. يبدو أن هناك مشكلة في الاتصال. يرجى المحاولة مرة أخرى.";
+                    return "أهلاً بك! أنا <span class='name-friend'>صديقتك الذكية</span>. يبدو أن هناك مشكلة في الاتصال. يرجى المحاولة مرة أخرى.";
                 } else {
-                    return "أهلاً بك! أنا <span class='name-louloua'>لؤلؤة</span> مساعدتك الذكية. كيف يمكنني مساعدتك اليوم؟";
+                    return "أهلاً بك! أنا <span class='name-friend'>صديقتك الذكية</span>. كيف يمكنني مساعدتك اليوم؟";
                 }
             }
         }
