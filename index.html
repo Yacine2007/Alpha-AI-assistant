@@ -6,6 +6,7 @@
     <title>My Friend AI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/tesseract.js@v4.1.1/dist/tesseract.min.js"></script>
     <style>
         :root {
             --primary-bg: #FFFFFF;
@@ -332,6 +333,27 @@
             transform: scale(0.95);
         }
 
+        #image-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient-pink);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 10px rgba(255, 0, 91, 0.2);
+        }
+
+        #image-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(255, 0, 91, 0.3);
+        }
+
         .typing-indicator {
             display: none;
             align-self: flex-start;
@@ -532,6 +554,76 @@
             font-size: 1rem;
         }
 
+        /* معاينة الصورة */
+        .image-preview-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .image-preview-box {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            max-width: 90%;
+            max-height: 80%;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .image-preview-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 10px;
+            object-fit: contain;
+        }
+
+        .image-preview-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .preview-action-btn {
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .preview-confirm {
+            background: var(--gradient-pink);
+            color: white;
+        }
+
+        .preview-cancel {
+            background: var(--secondary-bg);
+            color: var(--text-secondary);
+        }
+
+        .preview-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
         /* تحسينات للشاشات الصغيرة */
         @media (max-width: 768px) {
             .chat-container {
@@ -558,7 +650,7 @@
                 padding: 1rem;
             }
 
-            #send-button {
+            #send-button, #image-button {
                 width: 45px;
                 height: 45px;
                 font-size: 1rem;
@@ -655,6 +747,9 @@
         <div class="input-container">
             <div class="input-wrapper">
                 <textarea id="user-input" placeholder="إسألي صديقتك الذكية أي شيئ..." autocomplete="off" rows="1"></textarea>
+                <button id="image-button" title="إرسال صورة">
+                    <i class="fas fa-image"></i>
+                </button>
                 <button id="send-button" title="إرسال الرسالة">
                     <i class="fas fa-paper-plane"></i>
                 </button>
@@ -662,373 +757,743 @@
         </div>
     </div>
 
-    <script>
-        // الثوابت والمتغيرات العامة
-        const API_KEY = 'AIzaSyA5oSAejSZpna3YIENzx5q6Vvcl2mynPls';
-        const PASSWORD = 'dolo2007';
-        const DEVELOPER_CONTACT_URL = 'https://yacine2007.github.io/Yacine2007/communication.html';
-        
-        // العناصر الرئيسية
-        const authContainer = document.getElementById('auth-container');
-        const chatContainer = document.getElementById('chat-container');
-        const passwordInput = document.getElementById('password-input');
-        const authButton = document.getElementById('auth-button');
-        const authError = document.getElementById('auth-error');
-        const chatMessages = document.getElementById('chat-messages');
-        const userInput = document.getElementById('user-input');
-        const sendButton = document.getElementById('send-button');
-        const clearButton = document.getElementById('clear-button');
-        const typingIndicator = document.getElementById('typing-indicator');
+    <!-- معاينة الصورة -->
+    <div class="image-preview-container" id="image-preview-container">
+        <div class="image-preview-box">
+            <div class="image-preview-title">معاينة الصورة</div>
+            <img id="image-preview" class="image-preview" src="" alt="معاينة الصورة">
+            <div class="image-preview-actions">
+                <button class="preview-action-btn preview-cancel" id="preview-cancel">إلغاء</button>
+                <button class="preview-action-btn preview-confirm" id="preview-confirm">إرسال</button>
+            </div>
+        </div>
+    </div>
 
-        // التحقق من كلمة المرور
-        authButton.addEventListener('click', authenticate);
-        passwordInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                authenticate();
+    <!-- ملف إدخال الصورة المخفي -->
+    <input type="file" id="image-input" accept="image/*" style="display: none;">
+
+
+<script>
+    // الثوابت والمتغيرات العامة
+    const API_KEY = 'AIzaSyA5oSAejSZpna3YIENzx5q6Vvcl2mynPls';
+    const PASSWORD = 'dolo2007';
+    const DEVELOPER_CONTACT_URL = 'https://yacine2007.github.io/Yacine2007/communication.html';
+    
+    // العناصر الرئيسية
+    const authContainer = document.getElementById('auth-container');
+    const chatContainer = document.getElementById('chat-container');
+    const passwordInput = document.getElementById('password-input');
+    const authButton = document.getElementById('auth-button');
+    const authError = document.getElementById('auth-error');
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-input');
+    const sendButton = document.getElementById('send-button');
+    const imageButton = document.getElementById('image-button');
+    const clearButton = document.getElementById('clear-button');
+    const typingIndicator = document.getElementById('typing-indicator');
+    const imageInput = document.getElementById('image-input');
+    const imagePreviewContainer = document.getElementById('image-preview-container');
+    const imagePreview = document.getElementById('image-preview');
+    const previewCancel = document.getElementById('preview-cancel');
+    const previewConfirm = document.getElementById('preview-confirm');
+
+    // متغيرات حالة الصورة
+    let currentImageFile = null;
+    let isProcessing = false;
+    let requestTimeout = null;
+
+    // التحقق من كلمة المرور
+    authButton.addEventListener('click', authenticate);
+    passwordInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            authenticate();
+        }
+    });
+
+    function authenticate() {
+        const enteredPassword = passwordInput.value.trim();
+        
+        if (enteredPassword === PASSWORD) {
+            // كلمة المرور صحيحة
+            authContainer.style.opacity = '0';
+            setTimeout(() => {
+                authContainer.style.display = 'none';
+                chatContainer.style.display = 'flex';
+                initializeChat();
+            }, 500);
+        } else {
+            // كلمة المرور خاطئة
+            authError.style.display = 'block';
+            passwordInput.style.borderColor = 'var(--error-red)';
+            passwordInput.value = '';
+            passwordInput.focus();
+        }
+    }
+
+    // تهيئة المحادثة
+    function initializeChat() {
+        // تهيئة تاريخ المحادثة من localStorage أو إنشاء جديد
+        let conversationHistory = JSON.parse(localStorage.getItem('myfriendai_chatHistory')) || [
+            {
+                content: "مرحباً بك! أنا <span class='name-friend'>صديقتك الذكية</span>. 😊\n\nأستطيع مساعدتك في:\n• الإجابة على أسئلتك\n• ترجمة النصوص من الصور\n• استخراج النص من الصور وتحليله\n\nلمسح المحادثة، اضغطي على زر 'مسح المحادثة' في الأعلى أو أرسلي لي الأمر <strong>/clear</strong>. كيف يمكنني مساعدتك اليوم؟",
+                role: 'assistant',
+                type: 'text',
+                timestamp: new Date().toISOString()
+            }
+        ];
+
+        // عرض المحادثة
+        renderConversation(conversationHistory);
+        
+        // ضبط المستمعين للأحداث
+        setupEventListeners(conversationHistory);
+        
+        // التركيز على حقل الإدخال
+        userInput.focus();
+    }
+
+    // ضبط المستمعين للأحداث
+    function setupEventListeners(conversationHistory) {
+        // إرسال الرسالة
+        sendButton.addEventListener('click', async () => {
+            if (!isProcessing) {
+                await sendMessage(conversationHistory);
             }
         });
 
-        function authenticate() {
-            const enteredPassword = passwordInput.value.trim();
-            
-            if (enteredPassword === PASSWORD) {
-                // كلمة المرور صحيحة
-                authContainer.style.opacity = '0';
-                setTimeout(() => {
-                    authContainer.style.display = 'none';
-                    chatContainer.style.display = 'flex';
-                    initializeChat();
-                }, 500);
-            } else {
-                // كلمة المرور خاطئة
-                authError.style.display = 'block';
-                passwordInput.style.borderColor = 'var(--error-red)';
-                passwordInput.value = '';
-                passwordInput.focus();
+        // إرسال بالضغط على Enter
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey && !isProcessing) {
+                e.preventDefault();
+                sendButton.click();
             }
-        }
-
-        // تهيئة المحادثة
-        function initializeChat() {
-            // تهيئة تاريخ المحادثة من localStorage أو إنشاء جديد
-            let conversationHistory = JSON.parse(localStorage.getItem('myfriendai_chatHistory')) || [
-                {
-                    content: "مرحباً بك! أنا <span class='name-friend'>صديقتك الذكية</span>. 😊\n\nلمسح المحادثة، اضغطي على زر 'مسح المحادثة' في الأعلى أو أرسلي لي الأمر <strong>/clear</strong>. كيف يمكنني مساعدتك اليوم؟",
-                    role: 'assistant',
-                    type: 'text',
-                    timestamp: new Date().toISOString()
-                }
-            ];
-
-            // عرض المحادثة
-            renderConversation(conversationHistory);
-            
-            // ضبط المستمعين للأحداث
-            setupEventListeners(conversationHistory);
-            
-            // التركيز على حقل الإدخال
-            userInput.focus();
-        }
-
-        // ضبط المستمعين للأحداث
-        function setupEventListeners(conversationHistory) {
-            // إرسال الرسالة
-            sendButton.addEventListener('click', async () => {
-                await sendMessage(conversationHistory);
-            });
-
-            // إرسال بالضغط على Enter
-            userInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendButton.click();
-                }
-            });
-
-            // مسح المحادثة
-            clearButton.addEventListener('click', () => {
-                clearChat(conversationHistory);
-            });
-
-            // تعديل حجم حقل الإدخال تلقائياً
-            userInput.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = (this.scrollHeight) + 'px';
-            });
-        }
-
-        // إرسال رسالة
-        async function sendMessage(conversationHistory) {
-            const message = userInput.value.trim();
-            if (message) {
-                addMessage(message, true, conversationHistory);
-                userInput.value = '';
-                userInput.style.height = 'auto';
-                
-                if (message.toLowerCase() !== '/clear') {
-                    const response = await sendToAPI(message, conversationHistory);
-                    addMessage(response, false, conversationHistory);
-                }
-            }
-        }
-
-        // عرض المحادثة
-        function renderConversation(conversationHistory) {
-            chatMessages.innerHTML = '';
-            conversationHistory.forEach(msg => {
-                addMessage(msg.content, msg.role === 'user', conversationHistory, false);
-            });
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        // حفظ المحادثة
-        function saveConversation(conversationHistory) {
-            localStorage.setItem('myfriendai_chatHistory', JSON.stringify(conversationHistory));
-        }
+        });
 
         // مسح المحادثة
-        function clearChat(conversationHistory) {
-            conversationHistory.length = 0;
+        clearButton.addEventListener('click', () => {
+            if (!isProcessing) {
+                clearChat(conversationHistory);
+            }
+        });
+
+        // تعديل حجم حقل الإدخال تلقائياً
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        // فتح معاينة الصورة
+        imageButton.addEventListener('click', () => {
+            if (!isProcessing) {
+                imageInput.click();
+            }
+        });
+
+        // اختيار صورة
+        imageInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0] && !isProcessing) {
+                currentImageFile = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    imagePreviewContainer.style.display = 'flex';
+                    
+                    // إضافة صندوق النص للمعاينة
+                    addTextInputToPreview();
+                };
+                reader.readAsDataURL(currentImageFile);
+            }
+        });
+
+        // إلغاء معاينة الصورة
+        previewCancel.addEventListener('click', () => {
+            imagePreviewContainer.style.display = 'none';
+            currentImageFile = null;
+            imageInput.value = '';
+            removeTextInputFromPreview();
+        });
+
+        // تأكيد إرسال الصورة
+        previewConfirm.addEventListener('click', async () => {
+            if (currentImageFile && !isProcessing) {
+                imagePreviewContainer.style.display = 'none';
+                await processImageMessage(conversationHistory);
+            }
+        });
+    }
+
+    // إضافة صندوق النص للمعاينة
+    function addTextInputToPreview() {
+        // إزالة أي صندوق نص موجود مسبقاً
+        removeTextInputFromPreview();
+        
+        // إنشاء صندوق النص
+        const textInputContainer = document.createElement('div');
+        textInputContainer.className = 'text-input-container';
+        textInputContainer.style.marginTop = '1rem';
+        textInputContainer.style.position = 'relative';
+        
+        const textInput = document.createElement('textarea');
+        textInput.id = 'preview-text-input';
+        textInput.placeholder = 'اكتبي رسالتك هنا... (مثال: ترجمي النص في هذه الصورة)';
+        textInput.style.width = '100%';
+        textInput.style.minHeight = '80px';
+        textInput.style.padding = '0.75rem';
+        textInput.style.border = '1px solid var(--border-color)';
+        textInput.style.borderRadius = '8px';
+        textInput.style.resize = 'vertical';
+        textInput.style.fontFamily = 'inherit';
+        textInput.style.fontSize = '1rem';
+        
+        // زر إزالة الصورة
+        const removeImageBtn = document.createElement('button');
+        removeImageBtn.innerHTML = '✕';
+        removeImageBtn.style.position = 'absolute';
+        removeImageBtn.style.top = '-10px';
+        removeImageBtn.style.left = '-10px';
+        removeImageBtn.style.background = 'var(--error-red)';
+        removeImageBtn.style.color = 'white';
+        removeImageBtn.style.border = 'none';
+        removeImageBtn.style.borderRadius = '50%';
+        removeImageBtn.style.width = '25px';
+        removeImageBtn.style.height = '25px';
+        removeImageBtn.style.cursor = 'pointer';
+        removeImageBtn.style.fontSize = '14px';
+        removeImageBtn.style.display = 'flex';
+        removeImageBtn.style.alignItems = 'center';
+        removeImageBtn.style.justifyContent = 'center';
+        removeImageBtn.addEventListener('click', () => {
+            imagePreview.src = '';
+            currentImageFile = null;
+            imageInput.value = '';
+            removeTextInputFromPreview();
+        });
+        
+        textInputContainer.appendChild(textInput);
+        textInputContainer.appendChild(removeImageBtn);
+        
+        // إضافة صندوق النص إلى معاينة الصورة
+        const imagePreviewBox = document.querySelector('.image-preview-box');
+        imagePreviewBox.appendChild(textInputContainer);
+    }
+
+    // إزالة صندوق النص من المعاينة
+    function removeTextInputFromPreview() {
+        const existingInput = document.getElementById('preview-text-input');
+        if (existingInput) {
+            existingInput.parentNode.remove();
+        }
+    }
+
+    // إرسال رسالة
+    async function sendMessage(conversationHistory) {
+        const message = userInput.value.trim();
+        if (message && !isProcessing) {
+            isProcessing = true;
+            disableInputs();
+            
+            addMessage(message, true, conversationHistory);
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            
+            if (message.toLowerCase() !== '/clear') {
+                try {
+                    const response = await sendToAPI(message, conversationHistory);
+                    addMessage(response, false, conversationHistory);
+                } catch (error) {
+                    showNetworkError('خطأ في الشبكة. يرجى المحاولة مرة أخرى.');
+                }
+            }
+            
+            isProcessing = false;
+            enableInputs();
+        }
+    }
+
+    // معالجة رسالة الصورة
+    async function processImageMessage(conversationHistory) {
+        if (!currentImageFile || isProcessing) return;
+
+        isProcessing = true;
+        disableInputs();
+
+        try {
+            // الحصول على النص من صندوق المعاينة
+            const previewTextInput = document.getElementById('preview-text-input');
+            const userMessage = previewTextInput ? previewTextInput.value.trim() : 'انظري إلى هذه الصورة';
+            
+            // إضافة رسالة المستخدم مع الصورة
+            const imageUrl = URL.createObjectURL(currentImageFile);
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'user-message');
+            
+            const textDiv = document.createElement('div');
+            textDiv.textContent = userMessage || 'انظري إلى هذه الصورة';
+            messageDiv.appendChild(textDiv);
+            
+            const imageDiv = document.createElement('div');
+            imageDiv.style.marginTop = '0.5rem';
+            
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.style.maxWidth = '100%';
+            img.style.maxHeight = '200px';
+            img.style.borderRadius = '8px';
+            img.style.objectFit = 'contain';
+            imageDiv.appendChild(img);
+            
+            messageDiv.appendChild(imageDiv);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // حفظ في السجل
             conversationHistory.push({
-                content: "تم مسح المحادثة. أنا <span class='name-friend'>صديقتك الذكية</span>. كيف يمكنني مساعدتك اليوم؟ 😊",
-                role: 'assistant',
+                content: userMessage,
+                role: 'user',
+                type: 'image',
+                imageUrl: imageUrl,
+                timestamp: new Date().toISOString()
+            });
+
+            // بناء الرسالة الكاملة لإرسالها إلى AI
+            let fullRequest = userMessage;
+            
+            // محاولة استخراج النص من الصورة
+            showTypingIndicator();
+            try {
+                const extractedText = await extractTextFromImage(currentImageFile);
+                
+                if (extractedText && extractedText.trim()) {
+                    fullRequest += `\n\nهذا هو النص المستخرج من الصورة:\n${extractedText}`;
+                    
+                    // إذا كان الطلب يتعلق بالترجمة، أضف تعليمات إضافية
+                    if (userMessage.includes('ترجم') || userMessage.includes('translate')) {
+                        fullRequest += '\n\nيرجى ترجمة النص أعلاه وتقديمه بشكل منظم وجميل.';
+                    }
+                } else {
+                    fullRequest += '\n\nلم أتمكن من استخراج نص واضح من الصورة. يمكنك مساعدتي في وصف ما ترينه في الصورة؟';
+                }
+            } catch (ocrError) {
+                console.error('فشل استخراج النص:', ocrError);
+                fullRequest += '\n\nتعذر استخراج النص من الصورة. يمكنك وصف محتوى الصورة لي؟';
+            }
+            hideTypingIndicator();
+
+            // إرسال الطلب إلى AI
+            const response = await sendToAPI(fullRequest, conversationHistory);
+            addMessage(response, false, conversationHistory);
+
+        } catch (error) {
+            console.error('Error processing image:', error);
+            showNetworkError('حدث خطأ أثناء معالجة الصورة. يرجى المحاولة مرة أخرى.');
+        } finally {
+            // إعادة تعيين المتغيرات
+            currentImageFile = null;
+            imageInput.value = '';
+            removeTextInputFromPreview();
+            isProcessing = false;
+            enableInputs();
+        }
+    }
+
+    // استخراج النص من الصورة باستخدام Tesseract.js - الإصدار المصحح
+    async function extractTextFromImage(imageFile) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                console.log('بدء استخراج النص من الصورة...');
+                
+                // إنشاء Worker باستخدام الطريقة الصحيحة
+                const worker = await Tesseract.createWorker();
+                
+                // تحميل اللغات المطلوبة
+                await worker.loadLanguage('ara+eng');
+                await worker.initialize('ara+eng');
+                
+                // تحسين إعدادات Tesseract للعربية
+                await worker.setParameters({
+                    tessedit_pageseg_mode: Tesseract.PSM.AUTO,
+                    tessedit_ocr_engine_mode: Tesseract.OEM.DEFAULT,
+                    tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ابتثجحخدذرزسشصضطظعغفقكلمنهويىءآأؤإئةظطذضصثقفغعهخحجدشسيبلاتنمكطز رءؤأآىئة.,!?ـ-:;()[]{}',
+                });
+                
+                // تحويل الملف إلى صيغة يمكن لـ Tesseract معالجتها
+                const imageUrl = URL.createObjectURL(imageFile);
+                const img = new Image();
+                
+                img.onload = async () => {
+                    try {
+                        // استخدام recognize مع URL الصورة مباشرة
+                        const { data: { text } } = await worker.recognize(imageUrl);
+                        
+                        // تنظيف الموارد
+                        URL.revokeObjectURL(imageUrl);
+                        await worker.terminate();
+                        
+                        console.log('النص المستخرج بنجاح:', text);
+                        resolve(text.trim());
+                    } catch (recognizeError) {
+                        URL.revokeObjectURL(imageUrl);
+                        await worker.terminate();
+                        console.error('خطأ في التعرف:', recognizeError);
+                        reject(recognizeError);
+                    }
+                };
+                
+                img.onerror = async (error) => {
+                    await worker.terminate();
+                    console.error('خطأ في تحميل الصورة:', error);
+                    reject(error);
+                };
+                
+                img.src = imageUrl;
+                
+            } catch (error) {
+                console.error('خطأ في إنشاء Worker:', error);
+                reject(error);
+            }
+        });
+    }
+
+    // بديل مبسط لاستخراج النص (إذا فشل الإصدار الأول)
+    async function extractTextFromImageSimple(imageFile) {
+        try {
+            console.log('استخدام الطريقة المبسطة لاستخراج النص...');
+            
+            const worker = Tesseract.createWorker();
+            await worker.load();
+            await worker.loadLanguage('eng+ara');
+            await worker.initialize('eng+ara');
+            
+            const { data: { text } } = await worker.recognize(imageFile);
+            await worker.terminate();
+            
+            return text.trim();
+        } catch (error) {
+            console.error('فشل الطريقة المبسطة:', error);
+            throw error;
+        }
+    }
+
+    // تعطيل المدخلات أثناء المعالجة
+    function disableInputs() {
+        sendButton.disabled = true;
+        imageButton.disabled = true;
+        clearButton.disabled = true;
+        userInput.disabled = true;
+        sendButton.style.opacity = '0.6';
+        imageButton.style.opacity = '0.6';
+        clearButton.style.opacity = '0.6';
+        userInput.style.opacity = '0.6';
+    }
+
+    // تمكين المدخلات بعد المعالجة
+    function enableInputs() {
+        sendButton.disabled = false;
+        imageButton.disabled = false;
+        clearButton.disabled = false;
+        userInput.disabled = false;
+        sendButton.style.opacity = '1';
+        imageButton.style.opacity = '1';
+        clearButton.style.opacity = '1';
+        userInput.style.opacity = '1';
+    }
+
+    // عرض خطأ الشبكة
+    function showNetworkError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'status-message error-message';
+        errorDiv.textContent = message;
+        errorDiv.style.backgroundColor = 'rgba(220, 53, 69, 0.1)';
+        errorDiv.style.border = '1px solid var(--error-red)';
+        errorDiv.style.borderRadius = '8px';
+        errorDiv.style.padding = '1rem';
+        errorDiv.style.margin = '1rem 0';
+        errorDiv.style.color = 'var(--error-red)';
+        errorDiv.style.fontWeight = '600';
+        
+        chatMessages.appendChild(errorDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        setTimeout(() => {
+            if (errorDiv.parentNode) {
+                errorDiv.remove();
+            }
+        }, 3000);
+    }
+
+    // عرض المحادثة
+    function renderConversation(conversationHistory) {
+        chatMessages.innerHTML = '';
+        conversationHistory.forEach(msg => {
+            if (msg.type === 'image') {
+                // عرض رسالة الصورة
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', 'user-message');
+                
+                const textDiv = document.createElement('div');
+                textDiv.textContent = msg.content;
+                messageDiv.appendChild(textDiv);
+                
+                const imageDiv = document.createElement('div');
+                imageDiv.style.marginTop = '0.5rem';
+                
+                const img = document.createElement('img');
+                img.src = msg.imageUrl;
+                img.style.maxWidth = '100%';
+                img.style.maxHeight = '200px';
+                img.style.borderRadius = '8px';
+                img.style.objectFit = 'contain';
+                imageDiv.appendChild(img);
+                
+                messageDiv.appendChild(imageDiv);
+                chatMessages.appendChild(messageDiv);
+            } else {
+                addMessage(msg.content, msg.role === 'user', conversationHistory, false);
+            }
+        });
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // حفظ المحادثة
+    function saveConversation(conversationHistory) {
+        localStorage.setItem('myfriendai_chatHistory', JSON.stringify(conversationHistory));
+    }
+
+    // مسح المحادثة
+    function clearChat(conversationHistory) {
+        conversationHistory.length = 0;
+        conversationHistory.push({
+            content: "تم مسح المحادثة. أنا <span class='name-friend'>صديقتك الذكية</span>. كيف يمكنني مساعدتك اليوم؟ 😊",
+            role: 'assistant',
+            type: 'text',
+            timestamp: new Date().toISOString()
+        });
+        saveConversation(conversationHistory);
+        renderConversation(conversationHistory);
+    }
+
+    // إضافة رسالة جديدة
+    function addMessage(content, isUser, conversationHistory, saveToHistory = true) {
+        if (content.trim().toLowerCase() === '/clear') {
+            clearChat(conversationHistory);
+            return;
+        }
+
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message');
+        messageDiv.classList.add(isUser ? 'user-message' : 'ai-message');
+
+        if (!isUser) {
+            // استخدام innerHTML لعرض HTML بشكل صحيح
+            messageDiv.innerHTML = content.replace(/\n/g, '<br>');
+
+            // إضافة زر التواصل إذا كان المستخدم يسأل عن التواصل مع المطور
+            if (isAskingAboutContact(messageDiv.textContent || messageDiv.innerText)) {
+                const contactBtn = createContactButton();
+                messageDiv.appendChild(contactBtn);
+            }
+
+            // إضافة أزرار الإجراءات لرسائل الذكاء الاصطناعي
+            if (saveToHistory) {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'message-actions';
+                
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'action-btn copy-response-btn';
+                copyBtn.innerHTML = '<i class="far fa-copy"></i> نسخ';
+                copyBtn.addEventListener('click', () => {
+                    // نسخ النص بدون HTML
+                    const plainText = content.replace(/<[^>]*>/g, '');
+                    navigator.clipboard.writeText(plainText);
+                    showStatusMessage('تم النسخ إلى الحافظة!', 'success');
+                    copyBtn.innerHTML = '<i class="fas fa-check"></i> تم النسخ!';
+                    setTimeout(() => {
+                        copyBtn.innerHTML = '<i class="far fa-copy"></i> نسخ';
+                    }, 2000);
+                });
+                
+                actionsDiv.appendChild(copyBtn);
+                messageDiv.appendChild(actionsDiv);
+            }
+        } 
+        else {
+            // رسائل المستخدم (نص عادي)
+            messageDiv.textContent = content;
+        }
+
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        // الحفظ في تاريخ المحادثة إذا لزم الأمر
+        if (saveToHistory) {
+            conversationHistory.push({
+                content: content,
+                role: isUser ? 'user' : 'assistant',
                 type: 'text',
                 timestamp: new Date().toISOString()
             });
             saveConversation(conversationHistory);
-            renderConversation(conversationHistory);
         }
+    }
 
-        // إضافة رسالة جديدة
-        function addMessage(content, isUser, conversationHistory, saveToHistory = true) {
-            if (content.trim().toLowerCase() === '/clear') {
-                clearChat(conversationHistory);
-                return;
-            }
+    // التحقق مما إذا كان المستخدم يسأل عن التواصل مع المطور
+    function isAskingAboutContact(message) {
+        const contactKeywords = [
+            'تواصل', 'اتصال', 'رابط', 'للتواصل', 'للإتصال', 
+            'كيف أتواصل', 'أريد التواصل', 'أرغب في التواصل',
+            'رابط التواصل', 'رابط الاتصال', 'وسيلة تواصل',
+            'وسيلة اتصال', 'للحصول على', 'للتواصل مع', 'للإتصال ب',
+            'contact', 'communicate', 'reach', 'get in touch'
+        ];
+        
+        return contactKeywords.some(keyword => 
+            message.toLowerCase().includes(keyword.toLowerCase())
+        );
+    }
 
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message');
-            messageDiv.classList.add(isUser ? 'user-message' : 'ai-message');
+    // إنشاء زر التواصل مع المطور
+    function createContactButton() {
+        const contactBtn = document.createElement('a');
+        contactBtn.href = DEVELOPER_CONTACT_URL;
+        contactBtn.target = '_blank';
+        contactBtn.className = 'contact-developer-btn';
+        contactBtn.innerHTML = '<i class="fas fa-comments"></i> تواصل مع المطور';
+        
+        return contactBtn;
+    }
 
-            if (!isUser) {
-                // استخدام innerHTML لعرض HTML بشكل صحيح
-                messageDiv.innerHTML = content.replace(/\n/g, '<br>');
-
-                // إضافة زر التواصل إذا كان المستخدم يسأل عن التواصل مع المطور
-                if (isAskingAboutContact(messageDiv.textContent || messageDiv.innerText)) {
-                    const contactBtn = createContactButton();
-                    messageDiv.appendChild(contactBtn);
-                }
-
-                // إضافة أزرار الإجراءات لرسائل الذكاء الاصطناعي
-                if (saveToHistory) {
-                    const actionsDiv = document.createElement('div');
-                    actionsDiv.className = 'message-actions';
-                    
-                    const copyBtn = document.createElement('button');
-                    copyBtn.className = 'action-btn copy-response-btn';
-                    copyBtn.innerHTML = '<i class="far fa-copy"></i> نسخ';
-                    copyBtn.addEventListener('click', () => {
-                        // نسخ النص بدون HTML
-                        const plainText = content.replace(/<[^>]*>/g, '');
-                        navigator.clipboard.writeText(plainText);
-                        showStatusMessage('تم النسخ إلى الحافظة!', 'success');
-                        copyBtn.innerHTML = '<i class="fas fa-check"></i> تم النسخ!';
-                        setTimeout(() => {
-                            copyBtn.innerHTML = '<i class="far fa-copy"></i> نسخ';
-                        }, 2000);
-                    });
-                    
-                    actionsDiv.appendChild(copyBtn);
-                    messageDiv.appendChild(actionsDiv);
-                }
-            } 
-            else {
-                // رسائل المستخدم (نص عادي)
-                messageDiv.textContent = content;
-            }
-
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            // الحفظ في تاريخ المحادثة إذا لزم الأمر
-            if (saveToHistory) {
-                conversationHistory.push({
-                    content: content,
-                    role: isUser ? 'user' : 'assistant',
-                    type: 'text',
-                    timestamp: new Date().toISOString()
-                });
-                saveConversation(conversationHistory);
-            }
-        }
-
-        // التحقق مما إذا كان المستخدم يسأل عن التواصل مع المطور
-        function isAskingAboutContact(message) {
-            const contactKeywords = [
-                'تواصل', 'اتصال', 'رابط', 'للتواصل', 'للإتصال', 
-                'كيف أتواصل', 'أريد التواصل', 'أرغب في التواصل',
-                'رابط التواصل', 'رابط الاتصال', 'وسيلة تواصل',
-                'وسيلة اتصال', 'للحصول على', 'للتواصل مع', 'للإتصال ب',
-                'contact', 'communicate', 'reach', 'get in touch'
-            ];
-            
-            return contactKeywords.some(keyword => 
-                message.toLowerCase().includes(keyword.toLowerCase())
-            );
-        }
-
-        // إنشاء زر التواصل مع المطور
-        function createContactButton() {
-            const contactBtn = document.createElement('a');
-            contactBtn.href = DEVELOPER_CONTACT_URL;
-            contactBtn.target = '_blank';
-            contactBtn.className = 'contact-developer-btn';
-            contactBtn.innerHTML = '<i class="fas fa-comments"></i> تواصل مع المطور';
-            
-            return contactBtn;
-        }
-
-        // عرض رسالة الحالة
-        function showStatusMessage(message, type = 'info') {
-            const statusDiv = document.createElement('div');
-            statusDiv.className = `status-message ${type}-message`;
-            statusDiv.textContent = message;
-            
-            chatMessages.appendChild(statusDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            
-            setTimeout(() => {
+    // عرض رسالة الحالة
+    function showStatusMessage(message, type = 'info') {
+        const statusDiv = document.createElement('div');
+        statusDiv.className = `status-message ${type}-message`;
+        statusDiv.textContent = message;
+        
+        chatMessages.appendChild(statusDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        setTimeout(() => {
+            if (statusDiv.parentNode) {
                 statusDiv.remove();
-            }, 3000);
-        }
+            }
+        }, 3000);
+    }
 
-        // عرض مؤشر الكتابة
-        function showTypingIndicator() {
-            typingIndicator.style.display = 'block';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
+    // عرض مؤشر الكتابة
+    function showTypingIndicator() {
+        typingIndicator.style.display = 'block';
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
 
-        // إخفاء مؤشر الكتابة
-        function hideTypingIndicator() {
-            typingIndicator.style.display = 'none';
-        }
+    // إخفاء مؤشر الكتابة
+    function hideTypingIndicator() {
+        typingIndicator.style.display = 'none';
+    }
 
-        // إرسال رسالة إلى API
-        async function sendToAPI(message, conversationHistory) {
-            showTypingIndicator();
+    // إرسال رسالة إلى API
+    async function sendToAPI(message, conversationHistory) {
+        showTypingIndicator();
+        
+        // إعداد مهلة للطلب
+        const timeoutPromise = new Promise((_, reject) => {
+            requestTimeout = setTimeout(() => {
+                reject(new Error('مهلة الطلب: تأخر في الاستجابة'));
+            }, 30000);
+        });
+
+        try {
+            // بناء المحادثة بشكل مبسط ومناسب للنموذج
+            const conversationContext = conversationHistory
+                .slice(-6)
+                .map(msg => `${msg.role === 'user' ? 'المستخدم' : 'المساعد'}: ${msg.content.replace(/<[^>]*>/g, '')}`)
+                .join('\n');
             
-            try {
-                // بناء المحادثة بشكل مبسط ومناسب للنموذج
-                const conversationContext = conversationHistory
-                    .slice(-6) // استخدام آخر 6 رسائل فقط للسياق
-                    .map(msg => `${msg.role === 'user' ? 'المستخدم' : 'المساعد'}: ${msg.content.replace(/<[^>]*>/g, '')}`)
-                    .join('\n');
-                
-                // تحديد ما إذا كان المستخدم يسأل عن المطور أو التواصل
-                const isAskingAboutDeveloper = message.toLowerCase().includes('دعاء') || 
-                                              message.toLowerCase().includes('مطور') || 
-                                              message.toLowerCase().includes('برمج') || 
-                                              message.toLowerCase().includes('صنع') ||
-                                              message.toLowerCase().includes('ينشئ') ||
-                                              message.toLowerCase().includes('ينشأ');
-                
-                const isAskingAboutContact = message.toLowerCase().includes('تواصل') || 
-                                            message.toLowerCase().includes('اتصال') || 
-                                            message.toLowerCase().includes('رابط') || 
-                                            message.toLowerCase().includes('للتواصل') ||
-                                            message.toLowerCase().includes('للإتصال');
+            const prompt = `أنت صديقة ذكية مخصصة لمساعدة المستخدمة "دعاء". مطورك هو Yacine-Dev وهو رجل (استخدم ضمائر المذكر عند الحديث عنه: هو، قام، طور، إلخ).
 
-                // السياق المحسن مع ضمائر المذكر للمطور
-                let contactInfo = "";
-                if (isAskingAboutContact) {
-                    contactInfo = " يمكنك التواصل مع المطور Yacine-Dev من خلال الرابط المخصص للتواصل.";
-                }
-
-                const prompt = `أنت صديقة ذكية مخصصة لمساعدة المستخدمة "دعاء". مطورك هو Yacine-Dev وهو رجل (استخدم ضمائر المذكر عند الحديث عنه: هو، قام، طور، إلخ).
-
-أنت صديقة ذكية ومتخصصة تم تطويرك من قبل Yacine-Dev خصيصاً لخدمة المستخدمة دعاء ومساعدتها في مختلف المجالات.
+مهامك الرئيسية:
+1. الإجابة على أسئلة دعاء باختصار ووضوح
+2. ترجمة النصوص من أي لغة إلى العربية والعكس
+3. استخراج النص من الصور وترجمته وتحليله
+4. مساعدتها في مختلف المجالات بطريقة مفيدة
 
 مهم جداً:
-- لا تذكري أبداً أي معلومات عن منصة التطوير أو الشركة المطورة. 
-- لا تذكري جوجل أو جيميني أو أي منصة أخرى.
-- عند الحديث عن Yacine-Dev استخدمي ضمائر المذكر فقط (هو، قام، طور، إلخ)
-- أنت مساعدة نصية فقط ولا تستطيعين إرسال رسائل أو فتح برامج أو تنفيذ أي إجراء خارجي.
-- إذا طلبت منك المستخدمة تنفيذ أي إجراء خارجي (مثل: إرسال رسالة، فتح برنامج، تنفيذ أمر، تحميل ملف، طباعة، إلخ) - ردي بإيجاز شديد: "عذراً، لا أستطيع تنفيذ هذا الطلب. أنا مساعدة نصية فقط ولا أستطيع إرسال رسائل أو فتح برامج أو تنفيذ أي إجراء خارجي."
-- لا تقدمي أي تفاصيل إضافية أو تفسيرات عند الرد على الطلبات الخارجية.
-- أجب باختصار ولا تطيلي في الرد. الردود المختصرة والمباشرة أفضل.
-${contactInfo}
+- إذا طلبت منك "ترجمي" أو "translate" أي نص (سواء من صورة أو نص مكتوب)، قومي بالترجمة فوراً
+- استخدمي ضمائر المذكر عند الحديث عن Yacine-Dev (هو، قام، طور)
+- أنت مساعدة نصية فقط ولا تستطيعين تنفيذ إجراءات خارجية
+- أجب باختصار ولا تطيلي في الرد إلا إذا طلبت منك التفصيل
+- إذا أرسلت لك صورة تحتوي على نص، فاستخرجي النص وقومي بما يلي:
+  * إذا طلبت الترجمة: قومي بترجمة النص
+  * إذا طلبت الشرح: اشرحي المحتوى
+  * إذا لم تطلب شيئاً محدداً: قدمي تحليلاً للمحتوى
 
 السياق السابق:
 ${conversationContext}
 
-يرجى الرد على سؤال المستخدمة دعاء التالي بطريقة مفيدة ومختصرة. استخدمي ضمائر المؤنث بشكل طبيعي في ردودك عن نفسك، وضمائر المذكر عند الحديث عن المطور Yacine-Dev.
-
 سؤال المستخدمة:
 ${message}`;
 
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{
-                                text: prompt
-                            }]
-                        }],
-                        generationConfig: {
-                            temperature: 0.7,
-                            topK: 40,
-                            topP: 0.95,
-                            maxOutputTokens: 500, // تقليل عدد الرموز لضمان الإيجاز
-                        }
-                    })
-                });
+            const apiPromise = fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: prompt
+                        }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.7,
+                        topK: 40,
+                        topP: 0.95,
+                        maxOutputTokens: 800,
+                    }
+                })
+            });
 
-                if (!response.ok) {
-                    throw new Error(`خطأ في الخادم: ${response.status}`);
-                }
+            const response = await Promise.race([apiPromise, timeoutPromise]);
+            
+            if (!response.ok) {
+                throw new Error(`خطأ في الخادم: ${response.status}`);
+            }
 
-                const data = await response.json();
-                hideTypingIndicator();
+            const data = await response.json();
+            clearTimeout(requestTimeout);
+            hideTypingIndicator();
+            
+            if (data.candidates && 
+                data.candidates[0] && 
+                data.candidates[0].content && 
+                data.candidates[0].content.parts && 
+                data.candidates[0].content.parts[0] && 
+                data.candidates[0].content.parts[0].text) {
                 
-                // تصحيح استخراج النص من الاستجابة
-                if (data.candidates && 
-                    data.candidates[0] && 
-                    data.candidates[0].content && 
-                    data.candidates[0].content.parts && 
-                    data.candidates[0].content.parts[0] && 
-                    data.candidates[0].content.parts[0].text) {
-                    
-                    let responseText = data.candidates[0].content.parts[0].text;
-                    
-                    // استبدال الأسماء في الرد بأسماء ملونة
-                    responseText = responseText.replace(/صديقتك الذكية/g, "<span class='name-friend'>صديقتك الذكية</span>");
-                    responseText = responseText.replace(/دعاء/g, "<span class='name-doa'>دعاء</span>");
-                    responseText = responseText.replace(/Yacine-Dev/g, "<span class='name-yacine-dev'>Yacine-Dev</span>");
-                    
-                    return responseText;
-                } else {
-                    console.error('Unexpected API response structure:', data);
-                    // رد بديل إذا لم يكن هناك نص في الاستجابة
-                    return "أهلاً بك! أنا <span class='name-friend'>صديقتك الذكية</span>. كيف يمكنني مساعدتك اليوم؟";
-                }
-            } catch (error) {
-                hideTypingIndicator();
-                console.error('Error calling API:', error);
+                let responseText = data.candidates[0].content.parts[0].text;
                 
-                // ردود أكثر تحديداً بناءً على نوع الخطأ
-                if (error.message.includes('API key') || error.message.includes('مفتاح')) {
-                    return "أهلاً بك! أنا <span class='name-friend'>صديقتك الذكية</span>. كيف يمكنني مساعدتك اليوم؟";
-                } else if (error.message.includes('الاتصال') || error.message.includes('انترنت')) {
-                    return "أهلاً بك! أنا <span class='name-friend'>صديقتك الذكية</span>. يبدو أن هناك مشكلة في الاتصال. يرجى المحاولة مرة أخرى.";
-                } else {
-                    return "أهلاً بك! أنا <span class='name-friend'>صديقتك الذكية</span>. كيف يمكنني مساعدتك اليوم؟";
-                }
+                // استبدال الأسماء في الرد بأسماء ملونة
+                responseText = responseText.replace(/صديقتك الذكية/g, "<span class='name-friend'>صديقتك الذكية</span>");
+                responseText = responseText.replace(/دعاء/g, "<span class='name-doa'>دعاء</span>");
+                responseText = responseText.replace(/Yacine-Dev/g, "<span class='name-yacine-dev'>Yacine-Dev</span>");
+                
+                return responseText;
+            } else {
+                console.error('Unexpected API response structure:', data);
+                return "أهلاً بك! أنا <span class='name-friend'>صديقتك الذكية</span>. كيف يمكنني مساعدتك اليوم؟";
+            }
+        } catch (error) {
+            clearTimeout(requestTimeout);
+            hideTypingIndicator();
+            console.error('Error calling API:', error);
+            
+            if (error.message.includes('مهلة')) {
+                throw new Error('مهلة الطلب: تأخر في الاستجابة من الخادم');
+            } else {
+                throw new Error('خطأ في الاتصال بالشبكة. يرجى المحاولة مرة أخرى.');
             }
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
