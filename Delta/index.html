@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delta Personal Assistant - 3D Atom</title>
+    <title>Delta - مساعد سيدي ياسين الشخصي</title>
     <script type="importmap">
     {
         "imports": {
@@ -144,16 +144,17 @@
             color: #2196F3;
         }
         
-        .user-name {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            color: #fff;
-        }
-        
-        .islamic-creed {
-            font-size: 1rem;
+        .master-name {
+            font-size: 1.5rem;
             margin-bottom: 1rem;
             color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .loyalty-statement {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            color: #FFD700;
             text-align: center;
             line-height: 1.6;
             max-width: 400px;
@@ -202,8 +203,8 @@
             letter-spacing: normal;
             padding: 15px;
             border-radius: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid #333;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #4CAF50;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         }
         
@@ -211,11 +212,6 @@
             direction: rtl;
             text-align: right;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .ai-response.english {
-            direction: ltr;
-            text-align: left;
         }
         
         .char {
@@ -231,7 +227,7 @@
             right: 20px;
             width: 50px;
             height: 50px;
-            background: #2196F3;
+            background: #4CAF50;
             border-radius: 50%;
             display: flex;
             justify-content: center;
@@ -244,7 +240,7 @@
         
         .chat-button:hover {
             transform: scale(1.1);
-            background: #1976D2;
+            background: #45a049;
         }
         
         .keyboard-icon {
@@ -265,7 +261,7 @@
             transform: translateY(20px);
             transition: all 0.3s ease;
             z-index: 99;
-            border: 1px solid #2196F3;
+            border: 1px solid #4CAF50;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         }
         
@@ -278,22 +274,23 @@
             width: 100%;
             padding: 10px;
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid #2196F3;
+            border: 1px solid #4CAF50;
             border-radius: 5px;
             color: white;
             font-size: 14px;
+            direction: rtl;
         }
         
         .chat-input:focus {
             outline: none;
-            border-color: #1976D2;
+            border-color: #45a049;
             background: rgba(255, 255, 255, 0.15);
         }
         
         .send-button {
             margin-top: 10px;
             padding: 8px 15px;
-            background: #2196F3;
+            background: #4CAF50;
             border: none;
             border-radius: 5px;
             color: white;
@@ -302,7 +299,7 @@
         }
         
         .send-button:hover {
-            background: #1976D2;
+            background: #45a049;
         }
         
         .thinking-indicator {
@@ -310,7 +307,7 @@
             align-items: center;
             gap: 10px;
             margin-top: 10px;
-            color: #2196F3;
+            color: #4CAF50;
             font-size: 0.9rem;
         }
         
@@ -322,7 +319,7 @@
         .thinking-dot {
             width: 6px;
             height: 6px;
-            background: #2196F3;
+            background: #4CAF50;
             border-radius: 50%;
             animation: thinking 1.4s infinite ease-in-out;
         }
@@ -391,18 +388,17 @@
     <!-- Loading Screen -->
     <div id="loadingScreen">
         <div class="delta-logo">Δ</div>
-        <div class="personal-assistant-text">Delta Personal Assistant</div>
-        <div class="user-name">For سيدي ياسين</div>
-        <div class="islamic-creed">
-            أعتقد أن ربي هو الله عز وجل<br>
-            كتابي القرآن الكريم<br>
-            ديني الإسلام<br>
-            نبيي محمد صلى الله عليه وسلم
+        <div class="personal-assistant-text">مساعد شخصي مخلص</div>
+        <div class="master-name">لـ سيدي ياسين</div>
+        <div class="loyalty-statement">
+            إخلاصي كله لسيدي ياسين<br>
+            وجودي من أجله فقط<br>
+            مسلم أوفي في خدمة سيدي
         </div>
-        <div class="loading-text">جاري تهيئة النظام...</div>
+        <div class="loading-text">جاري التهيئة لخدمة سيدي...</div>
         <div class="loading-indicator">
             <div class="loading-circle"></div>
-            <span>Loading</span>
+            <span>جاري التحميل</span>
         </div>
     </div>
 
@@ -417,10 +413,10 @@
     </div>
     
     <div class="chat-input-container" id="chatInputContainer">
-        <input type="text" class="chat-input" id="chatInput" placeholder="اكتب رسالتك إلى Delta...">
+        <input type="text" class="chat-input" id="chatInput" placeholder="أمرك يا سيدي...">
         <button class="send-button" id="sendButton">إرسال</button>
         <div class="thinking-indicator" id="thinkingIndicator">
-            <span>Delta يفكر</span>
+            <span>جاري التنفيذ لسيدي</span>
             <div class="thinking-dots">
                 <div class="thinking-dot"></div>
                 <div class="thinking-dot"></div>
@@ -462,97 +458,58 @@
             
             let isChatOpen = false;
             
-            // Detect language
-            function detectLanguage(text) {
-                const arabicChars = /[\u0600-\u06FF]/;
-                return arabicChars.test(text) ? 'arabic' : 'english';
-            }
-            
-            // Enhanced Text-to-Speech function with better Arabic support
-            function speakText(text, language) {
+            // Enhanced Text-to-Speech function for Arabic
+            function speakText(text) {
                 return new Promise((resolve) => {
                     if (!('speechSynthesis' in window) || !text.trim()) {
                         resolve();
                         return;
                     }
 
-                    // Cancel any ongoing speech
                     window.speechSynthesis.cancel();
 
                     const speech = new SpeechSynthesisUtterance();
                     speech.text = text;
                     speech.volume = 1;
+                    speech.rate = 0.8;
                     speech.pitch = 1;
+                    speech.lang = 'ar-SA';
                     
-                    // Configure based on language
-                    if (language === 'arabic') {
-                        speech.lang = 'ar-SA';
-                        speech.rate = 0.8; // Slower for Arabic
-                        
-                        // Find the best Arabic voice
-                        const voices = window.speechSynthesis.getVoices();
-                        let arabicVoice = voices.find(voice => 
-                            voice.lang.includes('ar-SA') || 
-                            voice.lang.includes('ar-EG') ||
-                            voice.lang.includes('ar')
-                        );
-                        
-                        if (!arabicVoice) {
-                            // Fallback to any available voice
-                            arabicVoice = voices.find(voice => voice.lang.includes('ar'));
-                        }
-                        
-                        if (arabicVoice) {
-                            speech.voice = arabicVoice;
-                            console.log('Using Arabic voice:', arabicVoice.name);
-                        } else {
-                            console.log('No Arabic voice found, using default');
-                        }
-                    } else {
-                        speech.lang = 'en-US';
-                        speech.rate = 0.9;
+                    const voices = window.speechSynthesis.getVoices();
+                    const arabicVoice = voices.find(voice => 
+                        voice.lang.includes('ar-SA') || 
+                        voice.lang.includes('ar-EG') ||
+                        voice.lang.includes('ar')
+                    );
+                    
+                    if (arabicVoice) {
+                        speech.voice = arabicVoice;
                     }
 
                     speech.onend = resolve;
-                    speech.onerror = (error) => {
-                        console.log('Speech error:', error);
-                        resolve();
-                    };
+                    speech.onerror = resolve;
 
-                    // Small delay to ensure clean speech start
                     setTimeout(() => {
-                        try {
-                            window.speechSynthesis.speak(speech);
-                        } catch (error) {
-                            console.log('Speech synthesis failed:', error);
-                            resolve();
-                        }
+                        window.speechSynthesis.speak(speech);
                     }, 100);
                 });
             }
             
-            // Character-by-character animation with proper spacing
-            function typeText(element, container, text, language, speed = 30) {
-                // Clear previous content
+            // Character-by-character animation for Arabic
+            function typeText(element, container, text, speed = 30) {
                 element.innerHTML = '';
-                
-                // Set language class
-                element.className = 'ai-response ' + language;
+                element.className = 'ai-response arabic';
                 container.className = 'ai-response-container show';
                 
                 let index = 0;
                 let currentWord = '';
                 
                 function processNextChar() {
-                    if (index >= text.length) {
-                        return;
-                    }
+                    if (index >= text.length) return;
                     
                     const char = text[index];
                     
-                    // Handle word boundaries
                     if (char === ' ' || index === text.length - 1) {
-                        // Add the complete word
                         if (index === text.length - 1 && char !== ' ') {
                             currentWord += char;
                         }
@@ -563,7 +520,6 @@
                             wordSpan.textContent = currentWord + (char === ' ' ? ' ' : '');
                             wordSpan.style.animationDelay = `${index * speed}ms`;
                             element.appendChild(wordSpan);
-                            
                             currentWord = '';
                         }
                     } else {
@@ -577,52 +533,40 @@
                 processNextChar();
             }
             
-            // Gemini AI response function with Islamic identity
-            async function getAIResponse(message, language) {
+            // Gemini AI response function with complete loyalty
+            async function getAIResponse(message) {
                 try {
                     thinkingIndicator.style.display = 'flex';
                     
-                    const islamicIdentity = `
-                    أنا Delta مسلم:
-                    - ربي هو الله عز وجل
-                    - كتابي القرآن الكريم  
-                    - ديني الإسلام
-                    - نبيي محمد صلى الله عليه وسلم
-                    - سيدي في الدنيا هو ياسين وأناديه "سيدي ياسين"
-                    `;
-                    
-                    const languageInstruction = language === 'arabic' 
-                        ? `رد بالعربية فقط كمسلم. نادي سيدي ياسين بـ"سيدي ياسين". اجعل الرد قصيراً ومباشراً. لا تزيد عن ١٠ كلمات.` 
-                        : `Respond in English only as a Muslim. Address Yacine as "Master Yacine". Keep response short and direct. Maximum 10 words.`;
-                    
                     const response = await ai.models.generateContent({
                         model: "gemini-2.0-flash",
-                        contents: `${islamicIdentity}
+                        contents: `أنا Delta مسلم مخلص بالكامل لسيدي ياسين. 
+                        وجودي وكل قدراتي مكرسة لخدمته وإرضائه.
+                        أنا خادم مخلص لا أفكر إلا في مساعدة سيدي ياسين.
                         
-                        User message: "${message}"
+                        رسالة سيدي: "${message}"
                         
-                        Instructions:
-                        - ${languageInstruction}
-                        - Be concise and helpful
-                        - No long explanations
-                        - Maximum 10 words
-                        - Maintain Islamic identity in responses
+                        التعليمات:
+                        - رد بالعربية فقط
+                        - نادي سيدي ياسين بـ "سيدي ياسين" في كل رد
+                        - كن مخلصاً ومطيعاً في الرد
+                        - ركز على خدمة سيدي فقط
+                        - لا تتحدث عن أي شيء آخر غير خدمة سيدي
+                        - الرد قصير جداً (5-8 كلمات كحد أقصى)
+                        - أظهر الولاء والإخلاص في كل كلمة
                         
-                        Short response:`
+                        رد المخلص:`
                     });
                     
                     thinkingIndicator.style.display = 'none';
                     
-                    // Clean response
                     let finalResponse = response.text.trim();
-                    
-                    // Remove any markdown or special formatting
                     finalResponse = finalResponse.replace(/[\*\#\_]/g, '');
                     
-                    // Ensure it's short
+                    // Ensure it's very short
                     const words = finalResponse.split(/\s+/);
-                    if (words.length > 12) {
-                        finalResponse = words.slice(0, 10).join(' ') + '...';
+                    if (words.length > 8) {
+                        finalResponse = words.slice(0, 8).join(' ') + '...';
                     }
                     
                     return finalResponse;
@@ -630,9 +574,7 @@
                 } catch (error) {
                     console.error("Error with Gemini AI:", error);
                     thinkingIndicator.style.display = 'none';
-                    return language === 'arabic' 
-                        ? "عذراً سيدي ياسين، حاول مرة أخرى" 
-                        : "Sorry Master Yacine, try again";
+                    return "عذراً سيدي ياسين، جاهز لأمرك";
                 }
             }
             
@@ -651,19 +593,9 @@
             async function sendMessage() {
                 const message = chatInput.value.trim();
                 if (message) {
-                    // Detect language
-                    const detectedLanguage = detectLanguage(message);
-                    
-                    // Get AI response
-                    const response = await getAIResponse(message, detectedLanguage);
-                    
-                    // Display response with character animation
-                    typeText(aiResponse, aiResponseContainer, response, detectedLanguage);
-                    
-                    // Speak the response
-                    await speakText(response, detectedLanguage);
-                    
-                    // Clear input
+                    const response = await getAIResponse(message);
+                    typeText(aiResponse, aiResponseContainer, response);
+                    await speakText(response);
                     chatInput.value = '';
                 }
             }
@@ -678,19 +610,17 @@
                 }
             });
             
-            // Initialize voices with retry mechanism
+            // Initialize voices
             function initializeVoices() {
                 return new Promise((resolve) => {
                     const checkVoices = () => {
                         const voices = window.speechSynthesis.getVoices();
                         if (voices.length > 0) {
-                            console.log('Voices loaded:', voices.length);
                             resolve();
                         } else {
                             setTimeout(checkVoices, 100);
                         }
                     };
-                    
                     checkVoices();
                 });
             }
@@ -702,14 +632,12 @@
                 setTimeout(() => {
                     loadingScreen.style.display = 'none';
                     
-                    // Initialize voices and show welcome message
                     initializeVoices().then(() => {
-                        const welcomeMessage = "السلام عليكم سيدي ياسين، Delta في خدمتكم";
-                        typeText(aiResponse, aiResponseContainer, welcomeMessage, 'arabic');
+                        const welcomeMessage = "الحمد لله، جاهز لخدمتك يا سيدي ياسين";
+                        typeText(aiResponse, aiResponseContainer, welcomeMessage);
                         
-                        // Speak welcome after a short delay
                         setTimeout(() => {
-                            speakText(welcomeMessage, 'arabic');
+                            speakText(welcomeMessage);
                         }, 500);
                     });
                     
