@@ -11,6 +11,7 @@
         }
     }
     </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -117,7 +118,7 @@
         /* AI Response Text */
         .ai-response-container {
             position: fixed;
-            bottom: 20px;
+            bottom: 80px;
             left: 20px;
             max-width: 500px;
             opacity: 1;
@@ -132,17 +133,18 @@
             word-spacing: normal;
             letter-spacing: normal;
             padding: 12px;
-            border-radius: 8px;
-            background: rgba(0, 0, 0, 0.95);
-            border: 1px solid #333;
-            box-shadow: 0 0 20px rgba(33, 150, 243, 0.2);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #2196F3;
+            box-shadow: 0 0 20px rgba(33, 150, 243, 0.3);
             white-space: pre-wrap;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
         }
         
         .ai-response.arabic {
             direction: rtl;
             text-align: right;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .ai-response.english {
@@ -150,20 +152,10 @@
             text-align: left;
         }
         
-        .response-line {
-            display: block;
-            margin-bottom: 4px;
-            min-height: 18px;
-        }
-        
-        .master-name {
+        .message-sender {
             color: #2196F3;
             font-weight: bold;
-        }
-        
-        .delta-name {
-            color: #4CAF50;
-            font-weight: bold;
+            margin-bottom: 5px;
         }
         
         .code-block {
@@ -182,38 +174,12 @@
             top: 5px;
             right: 5px;
             background: #2196F3;
+            color: white;
             border: none;
             border-radius: 3px;
-            color: white;
             padding: 3px 8px;
             font-size: 10px;
             cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.3s;
-        }
-        
-        .copy-btn:hover {
-            opacity: 1;
-        }
-        
-        .stop-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: #f44336;
-            border: none;
-            border-radius: 3px;
-            color: white;
-            padding: 3px 8px;
-            font-size: 10px;
-            cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.3s;
-            display: none;
-        }
-        
-        .stop-btn:hover {
-            opacity: 1;
         }
         
         /* Chat Interface */
@@ -242,8 +208,7 @@
         
         .keyboard-icon {
             color: white;
-            font-size: 24px;
-            font-weight: bold;
+            font-size: 20px;
         }
         
         .chat-input-container {
@@ -267,9 +232,13 @@
             transform: translateY(0);
         }
         
+        .chat-input-wrapper {
+            position: relative;
+        }
+        
         .chat-input {
             width: 100%;
-            padding: 10px;
+            padding: 10px 40px 10px 10px;
             background: rgba(33, 150, 243, 0.1);
             border: 1px solid #2196F3;
             border-radius: 5px;
@@ -288,6 +257,19 @@
             box-shadow: 0 0 10px rgba(33, 150, 243, 0.3);
         }
         
+        .stop-button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #ff4444;
+            cursor: pointer;
+            font-size: 16px;
+            display: none;
+        }
+        
         .send-button {
             margin-top: 10px;
             padding: 8px 15px;
@@ -297,10 +279,36 @@
             color: white;
             cursor: pointer;
             transition: background 0.3s ease;
+            width: 100%;
         }
         
         .send-button:hover {
             background: #1976D2;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 6px 10px;
+            background: rgba(33, 150, 243, 0.2);
+            border: 1px solid #2196F3;
+            border-radius: 5px;
+            color: #2196F3;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .action-btn:hover {
+            background: rgba(33, 150, 243, 0.3);
         }
         
         .thinking-indicator {
@@ -327,6 +335,64 @@
         
         .thinking-dot:nth-child(1) { animation-delay: -0.32s; }
         .thinking-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        /* Full Chat Popup */
+        .chat-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            height: 80%;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #2196F3;
+            border-radius: 15px;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 0 50px rgba(33, 150, 243, 0.5);
+        }
+        
+        .chat-popup.show {
+            display: flex;
+        }
+        
+        .popup-header {
+            padding: 15px;
+            border-bottom: 1px solid #2196F3;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #2196F3;
+        }
+        
+        .close-popup {
+            background: none;
+            border: none;
+            color: #2196F3;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .popup-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            color: white;
+        }
+        
+        .popup-message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(33, 150, 243, 0.1);
+        }
+        
+        .popup-sender {
+            color: #2196F3;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
 
         @keyframes electronAnimation {
             0% { 
@@ -368,6 +434,12 @@
             }
         }
         
+        @keyframes charAppear {
+            to {
+                opacity: 1;
+            }
+        }
+        
         @keyframes thinking {
             0%, 80%, 100% { transform: scale(0); }
             40% { transform: scale(1); }
@@ -377,20 +449,30 @@
 <body>
     <!-- AI Response Text -->
     <div id="aiResponseContainer" class="ai-response-container">
-        <div id="aiResponse" class="ai-response">
-            <span class="delta-name">Delta:</span> جاهز لخدمتك يا <span class="master-name">سيدي ياسين</span>
-        </div>
-        <button class="stop-btn" id="stopBtn">⏹️ إيقاف</button>
+        <div id="aiResponse" class="ai-response"></div>
     </div>
 
     <!-- Chat Interface -->
     <div class="chat-button" id="chatButton">
-        <div class="keyboard-icon">⌨️</div>
+        <i class="keyboard-icon fas fa-keyboard"></i>
     </div>
     
     <div class="chat-input-container" id="chatInputContainer">
-        <input type="text" class="chat-input" id="chatInput" placeholder="أكتب أمرك لي يا سيدي ياسين...">
+        <div class="chat-input-wrapper">
+            <input type="text" class="chat-input" id="chatInput" placeholder="أكتب أمرك لي يا سيدي ياسين...">
+            <button class="stop-button" id="stopButton">
+                <i class="fas fa-square"></i>
+            </button>
+        </div>
         <button class="send-button" id="sendButton">إرسال</button>
+        <div class="action-buttons">
+            <button class="action-btn" id="expandButton">
+                <i class="fas fa-chevron-up"></i> عرض كامل
+            </button>
+            <button class="action-btn" id="copyButton">
+                <i class="fas fa-copy"></i> نسخ
+            </button>
+        </div>
         <div class="thinking-indicator" id="thinkingIndicator">
             <span>جار التنفيذ</span>
             <div class="thinking-dots">
@@ -398,6 +480,19 @@
                 <div class="thinking-dot"></div>
                 <div class="thinking-dot"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- Full Chat Popup -->
+    <div class="chat-popup" id="chatPopup">
+        <div class="popup-header">
+            <h3>محادثة كاملة - Delta وسيدي ياسين</h3>
+            <button class="close-popup" id="closePopup">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-content" id="popupContent">
+            <!-- Full conversation will be displayed here -->
         </div>
     </div>
 
@@ -429,15 +524,18 @@
             const chatInputContainer = document.getElementById('chatInputContainer');
             const chatInput = document.getElementById('chatInput');
             const sendButton = document.getElementById('sendButton');
+            const stopButton = document.getElementById('stopButton');
             const thinkingIndicator = document.getElementById('thinkingIndicator');
-            const stopBtn = document.getElementById('stopBtn');
+            const expandButton = document.getElementById('expandButton');
+            const copyButton = document.getElementById('copyButton');
+            const chatPopup = document.getElementById('chatPopup');
+            const popupContent = document.getElementById('popupContent');
+            const closePopup = document.getElementById('closePopup');
             
             let isChatOpen = false;
             let conversationHistory = [];
             let isTyping = false;
             let currentTypingTimeout = null;
-            let currentResponseLines = [];
-            let currentLineIndex = 0;
             
             // Load conversation history
             function loadConversationHistory() {
@@ -469,150 +567,89 @@
                 return arabicChars.test(text) ? 'arabic' : 'english';
             }
             
-            // Text-to-Speech function
-            function speakText(text, language) {
-                return new Promise((resolve) => {
-                    if (!('speechSynthesis' in window) || !text.trim()) {
-                        resolve();
-                        return;
-                    }
-
-                    window.speechSynthesis.cancel();
-
-                    const speech = new SpeechSynthesisUtterance();
-                    speech.text = text;
-                    speech.volume = 1;
-                    speech.rate = 1.0;
-                    speech.pitch = 1;
-                    
-                    if (language === 'arabic') {
-                        speech.lang = 'ar-SA';
-                        speech.rate = 0.9;
-                    } else {
-                        speech.lang = 'en-US';
-                        speech.rate = 1.0;
-                    }
-
-                    speech.onend = resolve;
-                    speech.onerror = resolve;
-
-                    setTimeout(() => {
-                        window.speechSynthesis.speak(speech);
-                    }, 50);
-                });
-            }
-            
-            // Format response with names and code blocks
-            function formatResponse(text, language) {
-                // Replace names with colored spans
-                text = text.replace(/سيدي ياسين/g, '<span class="master-name">سيدي ياسين</span>');
-                text = text.replace(/Master Yacine/g, '<span class="master-name">Master Yacine</span>');
-                text = text.replace(/Delta/g, '<span class="delta-name">Delta</span>');
+            // Format response with proper styling
+            function formatResponse(text, sender) {
+                const senderElement = `<div class="message-sender">${sender}</div>`;
                 
-                // Detect and format code blocks
-                text = text.replace(/```([\s\S]*?)```/g, function(match, code) {
-                    return `<div class="code-block">${code.trim()}<button class="copy-btn" onclick="copyCode(this)">📋 نسخ</button></div>`;
+                // Detect code blocks and format them
+                let formattedText = text.replace(/```(\w+)?\n([\s\S]*?)```/g, function(match, lang, code) {
+                    return `\n<div class="code-block">${code.trim()}<button class="copy-btn" onclick="copyToClipboard(this)"><i class="fas fa-copy"></i></button></div>\n`;
                 });
                 
                 // Format lists and line breaks
-                text = text.replace(/\n/g, '</div><div class="response-line">');
-                text = '<div class="response-line">' + text + '</div>';
+                formattedText = formattedText.replace(/\n/g, '<br>');
+                formattedText = formattedText.replace(/\d+\.\s/g, '<br>$&');
+                formattedText = formattedText.replace(/\-\s/g, '<br>• ');
                 
-                return text;
+                return senderElement + formattedText;
             }
             
-            // Smart typing with line management
-            function typeTextWithLines(element, text, language, speed = 30) {
+            // Global function for copy buttons
+            window.copyToClipboard = function(button) {
+                const codeBlock = button.parentElement;
+                const codeText = codeBlock.textContent.replace('Copy', '').trim();
+                
+                navigator.clipboard.writeText(codeText).then(() => {
+                    const originalHtml = button.innerHTML;
+                    button.innerHTML = '<i class="fas fa-check"></i>';
+                    setTimeout(() => {
+                        button.innerHTML = originalHtml;
+                    }, 2000);
+                });
+            };
+            
+            // Fast character animation with line management
+            function typeText(element, text, language, speed = 20) {
                 if (currentTypingTimeout) {
                     clearTimeout(currentTypingTimeout);
                     isTyping = false;
                 }
                 
-                stopBtn.style.display = 'block';
-                isTyping = true;
-                
                 element.innerHTML = '';
                 element.className = 'ai-response ' + language;
                 
-                const formattedText = formatResponse(text, language);
-                const lines = formattedText.split('</div><div class="response-line">');
-                currentResponseLines = lines;
-                currentLineIndex = 0;
+                const formattedText = formatResponse(text, 'Delta');
+                const lines = formattedText.split('<br>');
+                let currentLines = [];
+                let lineIndex = 0;
+                isTyping = true;
                 
-                function typeNextLine() {
-                    if (!isTyping || currentLineIndex >= currentResponseLines.length) {
-                        stopBtn.style.display = 'none';
+                function processNextLine() {
+                    if (!isTyping || lineIndex >= lines.length) {
                         isTyping = false;
                         return;
                     }
                     
+                    currentLines.push(lines[lineIndex]);
+                    
                     // Keep only last 3 lines
-                    if (currentLineIndex >= 3) {
-                        const lineElements = element.querySelectorAll('.response-line');
-                        if (lineElements.length >= 3) {
-                            lineElements[0].remove();
-                        }
+                    if (currentLines.length > 3) {
+                        currentLines = currentLines.slice(-3);
                     }
                     
-                    const currentLine = currentResponseLines[currentLineIndex];
-                    const lineDiv = document.createElement('div');
-                    lineDiv.className = 'response-line';
-                    lineDiv.innerHTML = currentLine;
+                    element.innerHTML = currentLines.join('<br>');
+                    lineIndex++;
                     
-                    element.appendChild(lineDiv);
-                    currentLineIndex++;
-                    
-                    // Scroll to bottom
-                    aiResponseContainer.scrollTop = aiResponseContainer.scrollHeight;
-                    
-                    currentTypingTimeout = setTimeout(typeNextLine, speed * 10);
+                    currentTypingTimeout = setTimeout(processNextLine, speed * 10);
                 }
                 
-                typeNextLine();
+                processNextLine();
             }
             
             // Stop typing function
             function stopTyping() {
                 if (currentTypingTimeout) {
                     clearTimeout(currentTypingTimeout);
-                    currentTypingTimeout = null;
+                    isTyping = false;
                 }
-                isTyping = false;
-                stopBtn.style.display = 'none';
-                
-                // Show all remaining lines immediately
-                if (currentLineIndex < currentResponseLines.length) {
-                    for (let i = currentLineIndex; i < currentResponseLines.length; i++) {
-                        if (currentLineIndex >= 3) {
-                            const lineElements = aiResponse.querySelectorAll('.response-line');
-                            if (lineElements.length >= 3) {
-                                lineElements[0].remove();
-                            }
-                        }
-                        
-                        const lineDiv = document.createElement('div');
-                        lineDiv.className = 'response-line';
-                        lineDiv.innerHTML = currentResponseLines[i];
-                        aiResponse.appendChild(lineDiv);
-                        currentLineIndex++;
-                    }
-                    aiResponseContainer.scrollTop = aiResponseContainer.scrollHeight;
-                }
+                window.speechSynthesis.cancel();
+                thinkingIndicator.style.display = 'none';
             }
             
-            // Copy code function
-            window.copyCode = function(button) {
-                const codeBlock = button.parentElement;
-                const codeText = codeBlock.textContent.replace('📋 نسخ', '').trim();
-                
-                navigator.clipboard.writeText(codeText).then(() => {
-                    const originalText = button.textContent;
-                    button.textContent = '✓ تم النسخ';
-                    setTimeout(() => {
-                        button.textContent = originalText;
-                    }, 2000);
-                });
-            };
+            // Show/hide stop button based on typing
+            function updateStopButton() {
+                stopButton.style.display = isTyping ? 'block' : 'none';
+            }
             
             // Build conversation context
             function buildConversationContext() {
@@ -632,6 +669,7 @@
             async function getAIResponse(message, language) {
                 try {
                     thinkingIndicator.style.display = 'flex';
+                    updateStopButton();
                     
                     // Add user message to history
                     conversationHistory.push({
@@ -651,13 +689,13 @@
                         الرسالة الجديدة من سيدي ياسين: "${message}"
                         
                         التعليمات:
-                        - رد بشكل منسق مع الأسطر والترقيم
-                        - استخدم القوائم والنقاط عندما يكون ذلك مناسباً
+                        - رد بشكل طبيعي وكامل
+                        - استخدم الترقيم والقوائم إذا كان ذلك مناسباً
                         - إذا كتبت كوداً برمجياً، ضعه بين علامات \`\`\`
+                        - استخدم الأسطر الجديدة لتنظيم النص
                         - تذكر كل ما سبق في المحادثة
                         - استمر في السياق الطبيعي
-                        - نادني دائماً بـ "سيدي ياسين"
-                        - كن مفيداً وواضحاً`
+                        - نادني دائماً بـ "سيدي ياسين"`
                         : `You are Delta, the loyal assistant to Master Yacine.
                         
                         Previous context:
@@ -666,19 +704,19 @@
                         New message from Master Yacine: "${message}"
                         
                         Instructions:
-                        - Respond with formatted lines and punctuation
-                        - Use lists and bullet points when appropriate
+                        - Respond naturally and completely
+                        - Use numbering and lists when appropriate
                         - If writing code, put it between \`\`\` marks
+                        - Use new lines to organize text
                         - Remember everything from previous conversation
                         - Continue the natural context
-                        - Always call me "Master Yacine"
-                        - Be helpful and clear`;
+                        - Always call me "Master Yacine"`;
                     
                     const response = await ai.models.generateContent({
                         model: "gemini-2.0-flash",
                         contents: prompt,
                         generationConfig: {
-                            maxOutputTokens: 800,
+                            maxOutputTokens: 1000,
                             temperature: 0.7
                         }
                     });
@@ -702,6 +740,7 @@
                 } catch (error) {
                     console.error("Error with Gemini AI:", error);
                     thinkingIndicator.style.display = 'none';
+                    updateStopButton();
                     
                     conversationHistory.push({
                         role: 'assistant',
@@ -715,7 +754,40 @@
                 }
             }
             
-            // Toggle chat interface
+            // Show full conversation in popup
+            function showFullConversation() {
+                popupContent.innerHTML = '';
+                
+                conversationHistory.forEach(msg => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'popup-message';
+                    
+                    const sender = msg.role === 'user' ? 'سيدي ياسين' : 'Delta';
+                    messageDiv.innerHTML = formatResponse(msg.content, sender);
+                    
+                    popupContent.appendChild(messageDiv);
+                });
+                
+                popupContent.scrollTop = popupContent.scrollHeight;
+                chatPopup.classList.add('show');
+            }
+            
+            // Copy current response to clipboard
+            function copyCurrentResponse() {
+                const lastResponse = conversationHistory[conversationHistory.length - 1];
+                if (lastResponse && lastResponse.role === 'assistant') {
+                    navigator.clipboard.writeText(lastResponse.content).then(() => {
+                        // Visual feedback
+                        const originalText = copyButton.innerHTML;
+                        copyButton.innerHTML = '<i class="fas fa-check"></i> تم النسخ';
+                        setTimeout(() => {
+                            copyButton.innerHTML = originalText;
+                        }, 2000);
+                    });
+                }
+            }
+            
+            // Event listeners
             chatButton.addEventListener('click', function() {
                 isChatOpen = !isChatOpen;
                 if (isChatOpen) {
@@ -726,38 +798,42 @@
                 }
             });
             
-            // Stop button event
-            stopBtn.addEventListener('click', stopTyping);
+            stopButton.addEventListener('click', stopTyping);
             
-            // Send message function
-            async function sendMessage() {
+            chatInput.addEventListener('input', updateStopButton);
+            
+            sendButton.addEventListener('click', async function() {
                 const message = chatInput.value.trim();
                 if (message) {
                     const detectedLanguage = detectLanguage(message);
                     const response = await getAIResponse(message, detectedLanguage);
                     
-                    typeTextWithLines(aiResponse, response, detectedLanguage);
-                    await speakText(response, detectedLanguage);
-                    
+                    typeText(aiResponse, response, detectedLanguage);
+                    updateStopButton();
                     chatInput.value = '';
                 }
-            }
+            });
             
-            // Send message on button click
-            sendButton.addEventListener('click', sendMessage);
-            
-            // Send message on Enter key
             chatInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
-                    sendMessage();
+                    sendButton.click();
                 }
+            });
+            
+            expandButton.addEventListener('click', showFullConversation);
+            
+            copyButton.addEventListener('click', copyCurrentResponse);
+            
+            closePopup.addEventListener('click', function() {
+                chatPopup.classList.remove('show');
             });
             
             // Initialize
             loadConversationHistory();
+            typeText(aiResponse, "جاهز لخدمتك يا سيدي ياسين", 'arabic');
             
             setTimeout(() => {
-                speakText("جاهز لخدمتك يا سيدي ياسين", 'arabic');
+                // speakText("جاهز لخدمتك يا سيدي ياسين", 'arabic');
             }, 1000);
         });
     </script>
