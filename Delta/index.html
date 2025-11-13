@@ -372,6 +372,33 @@
             const thinkingIndicator = document.getElementById('thinkingIndicator');
             
             let isChatOpen = false;
+            let conversationHistory = [];
+            
+            // Load conversation history from localStorage
+            function loadConversationHistory() {
+                try {
+                    const saved = localStorage.getItem('deltaConversationHistory');
+                    if (saved) {
+                        conversationHistory = JSON.parse(saved);
+                        // Keep only last 20 messages to avoid token limits
+                        if (conversationHistory.length > 20) {
+                            conversationHistory = conversationHistory.slice(-20);
+                        }
+                    }
+                } catch (e) {
+                    console.log('No previous conversation found');
+                    conversationHistory = [];
+                }
+            }
+            
+            // Save conversation history to localStorage
+            function saveConversationHistory() {
+                try {
+                    localStorage.setItem('deltaConversationHistory', JSON.stringify(conversationHistory));
+                } catch (e) {
+                    console.log('Could not save conversation history');
+                }
+            }
             
             // Detect language
             function detectLanguage(text) {
@@ -436,43 +463,105 @@
                 processNextChar();
             }
             
-            // Fast and direct AI response
+            // Build conversation context
+            function buildConversationContext() {
+                if (conversationHistory.length === 0) {
+                    return "لا يوجد محادثة سابقة.";
+                }
+                
+                let context = "المحادثة السابقة:\n";
+                conversationHistory.forEach((msg, index) => {
+                    context += `${msg.role === 'user' ? 'سيدي ياسين' : 'Delta'}: ${msg.content}\n`;
+                });
+                
+                return context;
+            }
+            
+            // Smart AI response with memory
             async function getAIResponse(message, language) {
                 try {
                     thinkingIndicator.style.display = 'flex';
                     
+                    // Add user message to history
+                    conversationHistory.push({
+                        role: 'user',
+                        content: message,
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    const conversationContext = buildConversationContext();
+                    
                     const prompt = language === 'arabic' 
-                        ? `رد مباشر وسريع على: "${message}" - ركز على تنفيذ الطلب فقط - لا تتحدث عن الدين - لا تماطل - أجب في 5 كلمات كحد أقصى - نادني بـ "سيدي ياسين"`
-                        : `Direct quick response to: "${message}" - Focus on executing the request only - No religious talk - No delays - Answer in max 5 words - Call me "Master Yacine"`;
+                        ? `أنت Delta المساعد المخلص لسيدي ياسين.
+                        
+                        السياق السابق:
+                        ${conversationContext}
+                        
+                        الرسالة الجديدة من سيدي ياسين: "${message}"
+                        
+                        التعليمات:
+                        - رد بشكل طبيعي وكامل
+                        - تذكر كل ما سبق في المحادثة
+                        - استمر في السياق الطبيعي
+                        - لا تختصر إلا إذا طلب منك ذلك
+                        - استخدم لغة محادثة طبيعية
+                        - نادني دائماً بـ "سيدي ياسين"
+                        - كن مفيداً وودوداً`
+                        : `You are Delta, the loyal assistant to Master Yacine.
+                        
+                        Previous context:
+                        ${conversationContext}
+                        
+                        New message from Master Yacine: "${message}"
+                        
+                        Instructions:
+                        - Respond naturally and completely
+                        - Remember everything from previous conversation
+                        - Continue the natural context
+                        - Don't shorten unless asked
+                        - Use natural conversation language
+                        - Always call me "Master Yacine"
+                        - Be helpful and friendly`;
                     
                     const response = await ai.models.generateContent({
                         model: "gemini-2.0-flash",
                         contents: prompt,
                         generationConfig: {
-                            maxOutputTokens: 50,
-                            temperature: 0.3
+                            maxOutputTokens: 500,
+                            temperature: 0.7
                         }
                     });
                     
                     thinkingIndicator.style.display = 'none';
                     
                     let finalResponse = response.text.trim();
-                    finalResponse = finalResponse.replace(/[\*\#\_\-]/g, '');
                     
-                    // Ensure very short response
-                    const words = finalResponse.split(/\s+/);
-                    if (words.length > 6) {
-                        finalResponse = words.slice(0, 5).join(' ');
-                    }
+                    // Add AI response to history
+                    conversationHistory.push({
+                        role: 'assistant',
+                        content: finalResponse,
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    // Save updated history
+                    saveConversationHistory();
                     
                     return finalResponse;
                     
                 } catch (error) {
                     console.error("Error with Gemini AI:", error);
                     thinkingIndicator.style.display = 'none';
+                    
+                    // Add error response to history
+                    conversationHistory.push({
+                        role: 'assistant',
+                        content: language === 'arabic' ? "عذراً سيدي، جاري إصلاح الاتصال" : "Sorry Master, fixing connection",
+                        timestamp: new Date().toISOString()
+                    });
+                    
                     return language === 'arabic' 
-                        ? "نفذت الأمر سيدي" 
-                        : "Done Master";
+                        ? "عذراً سيدي ياسين، جاري إصلاح الاتصال" 
+                        : "Sorry Master Yacine, fixing connection";
                 }
             }
             
@@ -511,9 +600,26 @@
                 }
             });
             
-            // Initialize immediately
+            // Clear conversation history (for testing)
+            function clearHistory() {
+                if (confirm('هل تريد مسح تاريخ المحادثة؟')) {
+                    conversationHistory = [];
+                    localStorage.removeItem('deltaConversationHistory');
+                    typeText(aiResponse, "تم مسح الذاكرة يا سيدي ياسين", 'arabic');
+                }
+            }
+            
+            // Add right-click to clear history
+            aiResponseContainer.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                clearHistory();
+            });
+            
+            // Initialize
+            loadConversationHistory();
+            
             setTimeout(() => {
-                speakText("جاهز لخدمتك يا سيدي ياسين", 'arabic');
+                speakText("جاهز لخدمتك يا سيدي ياسين، أتذكر كل محادثاتنا السابقة", 'arabic');
             }, 1000);
         });
     </script>
