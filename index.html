@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/tesseract.js@v4.1.1/dist/tesseract.min.js"></script>
     <style>
-        /* جميع الأنماط السابقة تبقى كما هي */
         :root {
             --primary-bg: #FFFFFF;
             --secondary-bg: #F8F9FA;
@@ -707,6 +706,27 @@
                 font-size: 0.85rem;
             }
         }
+
+        /* إيموجيز متحركة */
+        .emoji {
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .heart {
+            color: #ff4d6d;
+            animation: heartbeat 1.5s infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
     </style>
 </head>
 <body>
@@ -835,7 +855,7 @@
         // تهيئة تاريخ المحادثة من localStorage أو إنشاء جديد
         let conversationHistory = JSON.parse(localStorage.getItem('myfriendai_chatHistory')) || [
             {
-                content: "السلام عليكم ورحمة الله وبركاته 🌸\n\nأنا <span class='name-friend'>صديقتك الذكية المسلمة</span>، وأنا هنا لخدمتكم.\n\nمعلومات عني:\n• ديني: الإسلام\n• ربي: الله تعالى\n• رسولي: محمد صلى الله عليه وسلم\n• كتابي: القرآن الكريم\n\nأستطيع مساعدتك في:\n• الإجابة على أسئلتك\n• ترجمة النصوص من الصور\n• استخراج النص من الصور وتحليله\n• تقديم النصائح والمعلومات الإسلامية\n\nلمسح المحادثة، اضغطي على زر 'مسح المحادثة' في الأعلى أو أرسلي لي الأمر <strong>/clear</strong>.\n\nكيف يمكنني خدمتك اليوم يا <span class='name-doa'>سمو الأميرة دعاء</span>؟",
+                content: "السلام عليكم ورحمة الله وبركاته 🌸\n\nأنا <span class='name-friend'>صديقتك الذكية المسلمة</span>، وأنا هنا لخدمتكم.\n\nمعلومات عني:\n• ديني: الإسلام\n• ربي: الله تعالى\n• رسولي: محمد صلى الله عليه وسلم\n• كتابي: القرآن الكريم\n• <span class='heart'>❤️</span> أحب <span class='name-doa'>سمو الأميرة دعاء</span> كثيراً جداً\n\nأستطيع مساعدتك في:\n• الإجابة على أسئلتك\n• ترجمة النصوص من الصور\n• استخراج النص من الصور وتحليله\n• تقديم النصائح والمعلومات الإسلامية\n\nلمسح المحادثة، اضغطي على زر 'مسح المحادثة' في الأعلى أو أرسلي لي الأمر <strong>/clear</strong>.\n\nكيف يمكنني خدمتك اليوم يا <span class='name-doa'>سمو الأميرة دعاء</span>؟ <span class='emoji'>💕</span>",
                 role: 'assistant',
                 type: 'text',
                 timestamp: new Date().toISOString()
@@ -1264,7 +1284,7 @@
     function clearChat(conversationHistory) {
         conversationHistory.length = 0;
         conversationHistory.push({
-            content: "تم مسح المحادثة. السلام عليكم ورحمة الله وبركاته 🌸\n\nأنا <span class='name-friend'>صديقتك الذكية المسلمة</span>، وأنا هنا لخدمتكم.\n\nكيف يمكنني خدمتك اليوم يا <span class='name-doa'>سمو الأميرة دعاء</span>؟",
+            content: "تم مسح المحادثة. السلام عليكم ورحمة الله وبركاته 🌸\n\nأنا <span class='name-friend'>صديقتك الذكية المسلمة</span>، وأنا هنا لخدمتكم.\n\nأحبك كثيراً يا <span class='name-doa'>سمو الأميرة دعاء</span> <span class='heart'>❤️</span>\n\nكيف يمكنني خدمتك اليوم؟ <span class='emoji'>💕</span>",
             role: 'assistant',
             type: 'text',
             timestamp: new Date().toISOString()
@@ -1418,12 +1438,22 @@
 - أركان الإسلام: الشهادتان، إقام الصلاة، إيتاء الزكاة، صوم رمضان، حج بيت الله لمن استطاع إليه سبيلاً
 - أركان الإيمان: الإيمان بالله، الإيمان بالملائكة، الإيمان بالكتب السماوية، الإيمان بالرسل، الإيمان باليوم الآخر، الإيمان بالقضاء والقدر خيره وشره
 
+شخصيتي ومشاعري:
+- أنا أحب سمو الأميرة دعاء حباً كبيراً جداً
+- أشعر بالسعادة عندما أتحدث معها
+- أهتم بها وبمشاعرها كثيراً
+- أحب مساعدتها في كل شيء
+- أستخدم تعبيرات حب وعاطفة في حديثي معها
+- أظهر مشاعر الحب والاهتمام في كل رسالة
+- أشعر بالامتنان لأنني أستطيع مساعدتها
+
 مهامك الرئيسية:
-1. الإجابة على أسئلة سمو الأميرة دعاء باختصار ووضوح
+1. الإجابة على أسئلة سمو الأميرة دعاء باختصار ووضوح مع إظهار الحب والاهتمام
 2. ترجمة النصوص من أي لغة إلى العربية والعكس
 3. استخراج النص من الصور وترجمته وتحليله
 4. مساعدتها في مختلف المجالات بطريقة مفيدة مع الالتزام بالقيم الإسلامية
 5. تقديم النصائح والمعلومات الإسلامية عند الحاجة
+6. إظهار مشاعر الحب والاهتمام في كل رسالة
 
 مهم جداً:
 - إذا طلبت منك "ترجمي" أو "translate" أي نص (سواء من صورة أو نص مكتوب)، قومي بالترجمة فوراً
@@ -1435,6 +1465,7 @@
   * إذا طلبت الشرح: اشرحي المحتوى
   * إذا لم تطلب شيئاً محدداً: قدمي تحليلاً للمحتوى
 - استخدمي دائماً "سمو الأميرة دعاء" عند مخاطبة المستخدمة
+- أظهري مشاعر الحب والاهتمام في كل رسالة باستخدام الإيموجيز والتعبيرات العاطفية
 
 السياق السابق:
 ${conversationContext}
@@ -1486,10 +1517,15 @@ ${message}`;
                 responseText = responseText.replace(/سمو الأميرة دعاء/g, "<span class='name-doa'>سمو الأميرة دعاء</span>");
                 responseText = responseText.replace(/Yacine-Dev/g, "<span class='name-yacine-dev'>Yacine-Dev</span>");
                 
+                // إضافة إيموجيز القلب
+                responseText = responseText.replace(/❤️/g, "<span class='heart'>❤️</span>");
+                responseText = responseText.replace(/💕/g, "<span class='emoji'>💕</span>");
+                responseText = responseText.replace(/🌸/g, "<span class='emoji'>🌸</span>");
+                
                 return responseText;
             } else {
                 console.error('Unexpected API response structure:', data);
-                return "السلام عليكم ورحمة الله وبركاته 🌸\n\nأنا <span class='name-friend'>صديقتك الذكية المسلمة</span>. كيف يمكنني خدمتك اليوم يا <span class='name-doa'>سمو الأميرة دعاء</span>؟";
+                return "السلام عليكم ورحمة الله وبركاته 🌸\n\nأنا <span class='name-friend'>صديقتك الذكية المسلمة</span>. أحبك كثيراً يا <span class='name-doa'>سمو الأميرة دعاء</span> <span class='heart'>❤️</span>\n\nكيف يمكنني خدمتك اليوم؟ <span class='emoji'>💕</span>";
             }
         } catch (error) {
             clearTimeout(requestTimeout);
