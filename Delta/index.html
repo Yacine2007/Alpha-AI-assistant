@@ -115,13 +115,20 @@
             animation-duration: 5s;
         }
         
-        /* AI Response Text */
-        .ai-response-container {
+        /* AI Response Container */
+        .ai-response-wrapper {
             position: fixed;
             bottom: 80px;
             left: 20px;
             max-width: 500px;
-            opacity: 1;
+        }
+        
+        .ai-response-container {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #2196F3;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(33, 150, 243, 0.3);
+            margin-bottom: 10px;
             max-height: 120px;
             overflow: hidden;
         }
@@ -130,13 +137,7 @@
             color: white;
             font-size: 14px;
             line-height: 1.4;
-            word-spacing: normal;
-            letter-spacing: normal;
             padding: 12px;
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.9);
-            border: 1px solid #2196F3;
-            box-shadow: 0 0 20px rgba(33, 150, 243, 0.3);
             white-space: pre-wrap;
             overflow: hidden;
         }
@@ -150,6 +151,39 @@
         .ai-response.english {
             direction: ltr;
             text-align: left;
+        }
+        
+        .response-controls {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        
+        .control-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196F3;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: rgba(33, 150, 243, 0.4);
+            transform: scale(1.1);
+        }
+        
+        .control-btn.delete {
+            color: #ff4444;
+        }
+        
+        .control-btn.delete:hover {
+            background: rgba(255, 68, 68, 0.2);
         }
         
         .message-sender {
@@ -286,31 +320,6 @@
             background: #1976D2;
         }
         
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .action-btn {
-            flex: 1;
-            padding: 6px 10px;
-            background: rgba(33, 150, 243, 0.2);
-            border: 1px solid #2196F3;
-            border-radius: 5px;
-            color: #2196F3;
-            cursor: pointer;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-        }
-        
-        .action-btn:hover {
-            background: rgba(33, 150, 243, 0.3);
-        }
-        
         .thinking-indicator {
             display: none;
             align-items: center;
@@ -366,6 +375,34 @@
             color: #2196F3;
         }
         
+        .popup-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .popup-control-btn {
+            background: none;
+            border: none;
+            color: #2196F3;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+        
+        .popup-control-btn:hover {
+            background: rgba(33, 150, 243, 0.2);
+        }
+        
+        .popup-control-btn.delete-all {
+            color: #ff4444;
+        }
+        
+        .popup-control-btn.delete-all:hover {
+            background: rgba(255, 68, 68, 0.2);
+        }
+        
         .close-popup {
             background: none;
             border: none;
@@ -386,6 +423,35 @@
             padding: 10px;
             border-radius: 8px;
             background: rgba(33, 150, 243, 0.1);
+            position: relative;
+        }
+        
+        .popup-message-controls {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .popup-message:hover .popup-message-controls {
+            opacity: 1;
+        }
+        
+        .message-delete-btn {
+            background: rgba(255, 68, 68, 0.2);
+            border: none;
+            color: #ff4444;
+            width: 25px;
+            height: 25px;
+            border-radius: 3px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
         }
         
         .popup-sender {
@@ -447,9 +513,22 @@
     </style>
 </head>
 <body>
-    <!-- AI Response Text -->
-    <div id="aiResponseContainer" class="ai-response-container">
-        <div id="aiResponse" class="ai-response"></div>
+    <!-- AI Response Container with Controls -->
+    <div class="ai-response-wrapper">
+        <div class="ai-response-container">
+            <div id="aiResponse" class="ai-response"></div>
+        </div>
+        <div class="response-controls">
+            <button class="control-btn" id="expandBtn" title="عرض كامل">
+                <i class="fas fa-expand"></i>
+            </button>
+            <button class="control-btn" id="copyBtn" title="نسخ الرد">
+                <i class="fas fa-copy"></i>
+            </button>
+            <button class="control-btn delete" id="deleteBtn" title="حذف الرد">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
     </div>
 
     <!-- Chat Interface -->
@@ -465,14 +544,6 @@
             </button>
         </div>
         <button class="send-button" id="sendButton">إرسال</button>
-        <div class="action-buttons">
-            <button class="action-btn" id="expandButton">
-                <i class="fas fa-chevron-up"></i> عرض كامل
-            </button>
-            <button class="action-btn" id="copyButton">
-                <i class="fas fa-copy"></i> نسخ
-            </button>
-        </div>
         <div class="thinking-indicator" id="thinkingIndicator">
             <span>جار التنفيذ</span>
             <div class="thinking-dots">
@@ -487,9 +558,17 @@
     <div class="chat-popup" id="chatPopup">
         <div class="popup-header">
             <h3>محادثة كاملة - Delta وسيدي ياسين</h3>
-            <button class="close-popup" id="closePopup">
-                <i class="fas fa-times"></i>
-            </button>
+            <div class="popup-controls">
+                <button class="popup-control-btn" id="popupCopyAll" title="نسخ الكل">
+                    <i class="fas fa-copy"></i>
+                </button>
+                <button class="popup-control-btn delete-all" id="popupDeleteAll" title="حذف الكل">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <button class="close-popup" id="closePopup">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
         </div>
         <div class="popup-content" id="popupContent">
             <!-- Full conversation will be displayed here -->
@@ -518,18 +597,21 @@
         });
 
         document.addEventListener('DOMContentLoaded', function() {
-            const aiResponseContainer = document.getElementById('aiResponseContainer');
+            const aiResponseWrapper = document.querySelector('.ai-response-wrapper');
             const aiResponse = document.getElementById('aiResponse');
+            const expandBtn = document.getElementById('expandBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const deleteBtn = document.getElementById('deleteBtn');
             const chatButton = document.getElementById('chatButton');
             const chatInputContainer = document.getElementById('chatInputContainer');
             const chatInput = document.getElementById('chatInput');
             const sendButton = document.getElementById('sendButton');
             const stopButton = document.getElementById('stopButton');
             const thinkingIndicator = document.getElementById('thinkingIndicator');
-            const expandButton = document.getElementById('expandButton');
-            const copyButton = document.getElementById('copyButton');
             const chatPopup = document.getElementById('chatPopup');
             const popupContent = document.getElementById('popupContent');
+            const popupCopyAll = document.getElementById('popupCopyAll');
+            const popupDeleteAll = document.getElementById('popupDeleteAll');
             const closePopup = document.getElementById('closePopup');
             
             let isChatOpen = false;
@@ -617,6 +699,7 @@
                 function processNextLine() {
                     if (!isTyping || lineIndex >= lines.length) {
                         isTyping = false;
+                        updateStopButton();
                         return;
                     }
                     
@@ -644,6 +727,7 @@
                 }
                 window.speechSynthesis.cancel();
                 thinkingIndicator.style.display = 'none';
+                updateStopButton();
             }
             
             // Show/hide stop button based on typing
@@ -754,16 +838,67 @@
                 }
             }
             
+            // Delete current response
+            function deleteCurrentResponse() {
+                if (conversationHistory.length > 0) {
+                    conversationHistory.pop(); // Remove last AI response
+                    if (conversationHistory.length > 0 && conversationHistory[conversationHistory.length - 1].role === 'user') {
+                        conversationHistory.pop(); // Remove corresponding user message
+                    }
+                    saveConversationHistory();
+                    
+                    // Update display
+                    if (conversationHistory.length > 0) {
+                        const lastMessage = conversationHistory[conversationHistory.length - 1];
+                        if (lastMessage.role === 'assistant') {
+                            typeText(aiResponse, lastMessage.content, detectLanguage(lastMessage.content));
+                        } else {
+                            aiResponse.innerHTML = '';
+                        }
+                    } else {
+                        aiResponse.innerHTML = '';
+                    }
+                }
+            }
+            
+            // Delete all messages
+            function deleteAllMessages() {
+                if (confirm('هل تريد حذف كل الرسائل؟')) {
+                    conversationHistory = [];
+                    saveConversationHistory();
+                    aiResponse.innerHTML = '';
+                    if (chatPopup.classList.contains('show')) {
+                        showFullConversation();
+                    }
+                }
+            }
+            
+            // Delete specific message
+            function deleteMessage(index) {
+                if (index >= 0 && index < conversationHistory.length) {
+                    conversationHistory.splice(index, 1);
+                    saveConversationHistory();
+                    showFullConversation();
+                }
+            }
+            
             // Show full conversation in popup
             function showFullConversation() {
                 popupContent.innerHTML = '';
                 
-                conversationHistory.forEach(msg => {
+                conversationHistory.forEach((msg, index) => {
                     const messageDiv = document.createElement('div');
                     messageDiv.className = 'popup-message';
                     
                     const sender = msg.role === 'user' ? 'سيدي ياسين' : 'Delta';
-                    messageDiv.innerHTML = formatResponse(msg.content, sender);
+                    messageDiv.innerHTML = `
+                        <div class="popup-message-controls">
+                            <button class="message-delete-btn" onclick="deleteMessage(${index})" title="حذف الرسالة">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        ${formatResponse(msg.content, sender)}
+                    `;
                     
                     popupContent.appendChild(messageDiv);
                 });
@@ -778,13 +913,30 @@
                 if (lastResponse && lastResponse.role === 'assistant') {
                     navigator.clipboard.writeText(lastResponse.content).then(() => {
                         // Visual feedback
-                        const originalText = copyButton.innerHTML;
-                        copyButton.innerHTML = '<i class="fas fa-check"></i> تم النسخ';
+                        const originalHtml = copyBtn.innerHTML;
+                        copyBtn.innerHTML = '<i class="fas fa-check"></i>';
                         setTimeout(() => {
-                            copyButton.innerHTML = originalText;
+                            copyBtn.innerHTML = originalHtml;
                         }, 2000);
                     });
                 }
+            }
+            
+            // Copy all conversation to clipboard
+            function copyAllConversation() {
+                let fullText = '';
+                conversationHistory.forEach(msg => {
+                    const sender = msg.role === 'user' ? 'سيدي ياسين' : 'Delta';
+                    fullText += `${sender}: ${msg.content}\n\n`;
+                });
+                
+                navigator.clipboard.writeText(fullText).then(() => {
+                    const originalHtml = popupCopyAll.innerHTML;
+                    popupCopyAll.innerHTML = '<i class="fas fa-check"></i>';
+                    setTimeout(() => {
+                        popupCopyAll.innerHTML = originalHtml;
+                    }, 2000);
+                });
             }
             
             // Event listeners
@@ -820,13 +972,22 @@
                 }
             });
             
-            expandButton.addEventListener('click', showFullConversation);
+            expandBtn.addEventListener('click', showFullConversation);
             
-            copyButton.addEventListener('click', copyCurrentResponse);
+            copyBtn.addEventListener('click', copyCurrentResponse);
+            
+            deleteBtn.addEventListener('click', deleteCurrentResponse);
+            
+            popupCopyAll.addEventListener('click', copyAllConversation);
+            
+            popupDeleteAll.addEventListener('click', deleteAllMessages);
             
             closePopup.addEventListener('click', function() {
                 chatPopup.classList.remove('show');
             });
+            
+            // Global function for message deletion
+            window.deleteMessage = deleteMessage;
             
             // Initialize
             loadConversationHistory();
