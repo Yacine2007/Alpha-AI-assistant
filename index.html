@@ -742,44 +742,6 @@
             50% { transform: scale(1.1); }
         }
 
-        /* تفاعل القلب عند النقر المزدوج */
-        .message-reaction {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 3rem;
-            z-index: 10;
-            pointer-events: none;
-            opacity: 0;
-        }
-
-        .message-reaction.active {
-            animation: heartReaction 1s ease-out forwards;
-        }
-
-        @keyframes heartReaction {
-            0% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0);
-            }
-            15% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1.2);
-            }
-            30% {
-                transform: translate(-50%, -50%) scale(1);
-            }
-            70% {
-                opacity: 1;
-                transform: translate(-50%, -80%) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(-50%, -120%) scale(0.8);
-            }
-        }
-
         /* زر الحذف */
         .delete-message-btn {
             position: absolute;
@@ -808,6 +770,76 @@
         .delete-message-btn:hover {
             transform: scale(1.1);
             background: #c82333;
+        }
+
+        /* تفاعل القلب الثابت */
+        .message-reaction {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 0.5rem;
+            padding: 0.3rem;
+        }
+
+        .heart-reaction {
+            color: #ff4d6d;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .heart-reaction:hover {
+            transform: scale(1.2);
+        }
+
+        .heart-reaction.active {
+            color: #ff4d6d;
+            animation: heartPop 0.6s ease;
+        }
+
+        @keyframes heartPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1.2); }
+        }
+
+        /* تفاعل القلب عند النقر المزدوج */
+        .double-click-heart {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0;
+            color: #ff4d6d;
+        }
+
+        .double-click-heart.active {
+            animation: heartReaction 1s ease-out forwards;
+        }
+
+        @keyframes heartReaction {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0);
+            }
+            15% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+            30% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+            70% {
+                opacity: 1;
+                transform: translate(-50%, -80%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -120%) scale(0.8);
+            }
         }
     </style>
 </head>
@@ -942,7 +974,8 @@
                 role: 'assistant',
                 type: 'text',
                 timestamp: new Date().toISOString(),
-                id: generateMessageId()
+                id: generateMessageId(),
+                liked: false
             }
         ];
 
@@ -1163,7 +1196,8 @@
                 type: 'image',
                 imageUrl: imageUrl,
                 timestamp: new Date().toISOString(),
-                id: generateMessageId()
+                id: generateMessageId(),
+                liked: false
             });
 
             // بناء الرسالة الكاملة لإرسالها إلى AI
@@ -1362,12 +1396,15 @@
                 // إضافة زر الحذف
                 addDeleteButton(messageDiv, msg.id, conversationHistory);
                 
+                // إضافة تفاعل القلب الثابت
+                addHeartReaction(messageDiv, msg.id, conversationHistory, msg.liked);
+                
                 // إضافة تفاعل النقر المزدوج
-                addDoubleClickReaction(messageDiv);
+                addDoubleClickReaction(messageDiv, msg.id, conversationHistory);
                 
                 chatMessages.appendChild(messageDiv);
             } else {
-                addMessage(msg.content, msg.role === 'user', conversationHistory, false, msg.id);
+                addMessage(msg.content, msg.role === 'user', conversationHistory, false, msg.id, msg.liked);
             }
         });
         chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -1393,12 +1430,7 @@
         const messageIndex = conversationHistory.findIndex(msg => msg.id === messageId);
         
         if (messageIndex !== -1) {
-            // منع حذف الرسالة الأولى (الرسالة الترحيبية)
-            if (messageIndex === 0) {
-                showStatusMessage('لا يمكن حذف الرسالة الترحيبية', 'error');
-                return;
-            }
-            
+            // السماح بحذف جميع الرسائل بما فيها الأولى
             conversationHistory.splice(messageIndex, 1);
             saveConversation(conversationHistory);
             renderConversation(conversationHistory);
@@ -1406,14 +1438,49 @@
         }
     }
 
+    // إضافة تفاعل القلب الثابت
+    function addHeartReaction(messageElement, messageId, conversationHistory, isLiked = false) {
+        const reactionContainer = document.createElement('div');
+        reactionContainer.className = 'message-reaction';
+        
+        const heartIcon = document.createElement('i');
+        heartIcon.className = isLiked ? 'fas fa-heart heart-reaction active' : 'far fa-heart heart-reaction';
+        heartIcon.title = isLiked ? 'إلغاء الإعجاب' : 'إعجاب';
+        
+        heartIcon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleLike(messageId, conversationHistory, heartIcon);
+        });
+        
+        reactionContainer.appendChild(heartIcon);
+        messageElement.appendChild(reactionContainer);
+    }
+
+    // تبديل حالة الإعجاب
+    function toggleLike(messageId, conversationHistory, heartIcon) {
+        const message = conversationHistory.find(msg => msg.id === messageId);
+        if (message) {
+            message.liked = !message.liked;
+            saveConversation(conversationHistory);
+            
+            if (message.liked) {
+                heartIcon.className = 'fas fa-heart heart-reaction active';
+                heartIcon.title = 'إلغاء الإعجاب';
+            } else {
+                heartIcon.className = 'far fa-heart heart-reaction';
+                heartIcon.title = 'إعجاب';
+            }
+        }
+    }
+
     // إضافة تفاعل النقر المزدوج
-    function addDoubleClickReaction(messageElement) {
+    function addDoubleClickReaction(messageElement, messageId, conversationHistory) {
         let tapCount = 0;
         let tapTimer;
         
         messageElement.addEventListener('click', (e) => {
-            // تجاهل النقر على زر الحذف
-            if (e.target.closest('.delete-message-btn')) {
+            // تجاهل النقر على زر الحذف والقلب
+            if (e.target.closest('.delete-message-btn') || e.target.closest('.heart-reaction')) {
                 return;
             }
             
@@ -1426,14 +1493,15 @@
             } else if (tapCount === 2) {
                 clearTimeout(tapTimer);
                 tapCount = 0;
-                showHeartReaction(messageElement);
+                showDoubleClickHeart(messageElement);
+                toggleLikeOnDoubleClick(messageId, conversationHistory, messageElement);
             }
         });
         
         // دعم النقر المزدوج على الأجهزة المحمولة
         messageElement.addEventListener('touchend', (e) => {
-            // تجاهل النقر على زر الحذف
-            if (e.target.closest('.delete-message-btn')) {
+            // تجاهل النقر على زر الحذف والقلب
+            if (e.target.closest('.delete-message-btn') || e.target.closest('.heart-reaction')) {
                 return;
             }
             
@@ -1442,7 +1510,8 @@
             
             if (tapLength < 300 && tapLength > 0) {
                 // نقر مزدوج
-                showHeartReaction(messageElement);
+                showDoubleClickHeart(messageElement);
+                toggleLikeOnDoubleClick(messageId, conversationHistory, messageElement);
                 e.preventDefault();
             }
             
@@ -1450,16 +1519,16 @@
         });
     }
 
-    // عرض تفاعل القلب
-    function showHeartReaction(messageElement) {
+    // عرض تفاعل القلب عند النقر المزدوج
+    function showDoubleClickHeart(messageElement) {
         // إنصراف العنصر إذا كان هناك تفاعل نشط بالفعل
-        if (messageElement.querySelector('.message-reaction.active')) {
+        if (messageElement.querySelector('.double-click-heart.active')) {
             return;
         }
         
         const heart = document.createElement('div');
-        heart.className = 'message-reaction heart';
-        heart.innerHTML = '❤️';
+        heart.className = 'double-click-heart';
+        heart.innerHTML = '<i class="fas fa-heart"></i>';
         
         messageElement.appendChild(heart);
         
@@ -1476,6 +1545,19 @@
         }, 1000);
     }
 
+    // تبديل الإعجاب عند النقر المزدوج
+    function toggleLikeOnDoubleClick(messageId, conversationHistory, messageElement) {
+        const message = conversationHistory.find(msg => msg.id === messageId);
+        const heartIcon = messageElement.querySelector('.heart-reaction');
+        
+        if (message && heartIcon) {
+            message.liked = true;
+            saveConversation(conversationHistory);
+            heartIcon.className = 'fas fa-heart heart-reaction active';
+            heartIcon.title = 'إلغاء الإعجاب';
+        }
+    }
+
     // حفظ المحادثة
     function saveConversation(conversationHistory) {
         localStorage.setItem('myfriendai_chatHistory', JSON.stringify(conversationHistory));
@@ -1489,14 +1571,15 @@
             role: 'assistant',
             type: 'text',
             timestamp: new Date().toISOString(),
-            id: generateMessageId()
+            id: generateMessageId(),
+            liked: false
         });
         saveConversation(conversationHistory);
         renderConversation(conversationHistory);
     }
 
     // إضافة رسالة جديدة
-    function addMessage(content, isUser, conversationHistory, saveToHistory = true, messageId = null) {
+    function addMessage(content, isUser, conversationHistory, saveToHistory = true, messageId = null, isLiked = false) {
         if (content.trim().toLowerCase() === '/clear') {
             clearChat(conversationHistory);
             return;
@@ -1551,13 +1634,20 @@
             messageDiv.textContent = content;
         }
 
-        // إضافة زر الحذف للرسائل التي يمكن حفظها
+        // إضافة زر الحذف لجميع الرسائل
         if (saveToHistory && messageId) {
             addDeleteButton(messageDiv, messageId, conversationHistory);
         }
         
+        // إضافة تفاعل القلب الثابت لجميع الرسائل
+        if (saveToHistory && messageId) {
+            addHeartReaction(messageDiv, messageId, conversationHistory, isLiked);
+        }
+        
         // إضافة تفاعل النقر المزدوج لجميع الرسائل
-        addDoubleClickReaction(messageDiv);
+        if (saveToHistory && messageId) {
+            addDoubleClickReaction(messageDiv, messageId, conversationHistory);
+        }
 
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -1569,7 +1659,8 @@
                 role: isUser ? 'user' : 'assistant',
                 type: 'text',
                 timestamp: new Date().toISOString(),
-                id: messageId
+                id: messageId,
+                liked: isLiked
             });
             saveConversation(conversationHistory);
         }
