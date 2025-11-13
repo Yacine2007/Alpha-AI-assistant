@@ -121,25 +121,28 @@
             left: 20px;
             max-width: 500px;
             opacity: 1;
+            max-height: 120px;
+            overflow: hidden;
         }
         
         .ai-response {
-            color: #2196F3;
-            font-size: 16px;
-            line-height: 1.5;
+            color: white;
+            font-size: 14px;
+            line-height: 1.4;
             word-spacing: normal;
             letter-spacing: normal;
-            padding: 15px;
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.9);
-            border: 1px solid #2196F3;
-            box-shadow: 0 0 20px rgba(33, 150, 243, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 1px solid #333;
+            box-shadow: 0 0 20px rgba(33, 150, 243, 0.2);
+            white-space: pre-wrap;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .ai-response.arabic {
             direction: rtl;
             text-align: right;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .ai-response.english {
@@ -147,10 +150,70 @@
             text-align: left;
         }
         
-        .char {
-            display: inline;
-            opacity: 0;
-            animation: charAppear 0.03s forwards;
+        .response-line {
+            display: block;
+            margin-bottom: 4px;
+            min-height: 18px;
+        }
+        
+        .master-name {
+            color: #2196F3;
+            font-weight: bold;
+        }
+        
+        .delta-name {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .code-block {
+            background: rgba(33, 150, 243, 0.1);
+            border: 1px solid #2196F3;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 8px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            position: relative;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #2196F3;
+            border: none;
+            border-radius: 3px;
+            color: white;
+            padding: 3px 8px;
+            font-size: 10px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        
+        .copy-btn:hover {
+            opacity: 1;
+        }
+        
+        .stop-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #f44336;
+            border: none;
+            border-radius: 3px;
+            color: white;
+            padding: 3px 8px;
+            font-size: 10px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            display: none;
+        }
+        
+        .stop-btn:hover {
+            opacity: 1;
         }
         
         /* Chat Interface */
@@ -210,7 +273,7 @@
             background: rgba(33, 150, 243, 0.1);
             border: 1px solid #2196F3;
             border-radius: 5px;
-            color: #2196F3;
+            color: white;
             font-size: 14px;
         }
         
@@ -305,12 +368,6 @@
             }
         }
         
-        @keyframes charAppear {
-            to {
-                opacity: 1;
-            }
-        }
-        
         @keyframes thinking {
             0%, 80%, 100% { transform: scale(0); }
             40% { transform: scale(1); }
@@ -320,7 +377,10 @@
 <body>
     <!-- AI Response Text -->
     <div id="aiResponseContainer" class="ai-response-container">
-        <div id="aiResponse" class="ai-response">جاهز لخدمتك يا سيدي ياسين</div>
+        <div id="aiResponse" class="ai-response">
+            <span class="delta-name">Delta:</span> جاهز لخدمتك يا <span class="master-name">سيدي ياسين</span>
+        </div>
+        <button class="stop-btn" id="stopBtn">⏹️ إيقاف</button>
     </div>
 
     <!-- Chat Interface -->
@@ -370,28 +430,31 @@
             const chatInput = document.getElementById('chatInput');
             const sendButton = document.getElementById('sendButton');
             const thinkingIndicator = document.getElementById('thinkingIndicator');
+            const stopBtn = document.getElementById('stopBtn');
             
             let isChatOpen = false;
             let conversationHistory = [];
+            let isTyping = false;
+            let currentTypingTimeout = null;
+            let currentResponseLines = [];
+            let currentLineIndex = 0;
             
-            // Load conversation history from localStorage
+            // Load conversation history
             function loadConversationHistory() {
                 try {
                     const saved = localStorage.getItem('deltaConversationHistory');
                     if (saved) {
                         conversationHistory = JSON.parse(saved);
-                        // Keep only last 20 messages to avoid token limits
                         if (conversationHistory.length > 20) {
                             conversationHistory = conversationHistory.slice(-20);
                         }
                     }
                 } catch (e) {
-                    console.log('No previous conversation found');
                     conversationHistory = [];
                 }
             }
             
-            // Save conversation history to localStorage
+            // Save conversation history
             function saveConversationHistory() {
                 try {
                     localStorage.setItem('deltaConversationHistory', JSON.stringify(conversationHistory));
@@ -406,7 +469,7 @@
                 return arabicChars.test(text) ? 'arabic' : 'english';
             }
             
-            // Fast Text-to-Speech function
+            // Text-to-Speech function
             function speakText(text, language) {
                 return new Promise((resolve) => {
                     if (!('speechSynthesis' in window) || !text.trim()) {
@@ -439,29 +502,117 @@
                 });
             }
             
-            // Fast character animation
-            function typeText(element, text, language, speed = 20) {
+            // Format response with names and code blocks
+            function formatResponse(text, language) {
+                // Replace names with colored spans
+                text = text.replace(/سيدي ياسين/g, '<span class="master-name">سيدي ياسين</span>');
+                text = text.replace(/Master Yacine/g, '<span class="master-name">Master Yacine</span>');
+                text = text.replace(/Delta/g, '<span class="delta-name">Delta</span>');
+                
+                // Detect and format code blocks
+                text = text.replace(/```([\s\S]*?)```/g, function(match, code) {
+                    return `<div class="code-block">${code.trim()}<button class="copy-btn" onclick="copyCode(this)">📋 نسخ</button></div>`;
+                });
+                
+                // Format lists and line breaks
+                text = text.replace(/\n/g, '</div><div class="response-line">');
+                text = '<div class="response-line">' + text + '</div>';
+                
+                return text;
+            }
+            
+            // Smart typing with line management
+            function typeTextWithLines(element, text, language, speed = 30) {
+                if (currentTypingTimeout) {
+                    clearTimeout(currentTypingTimeout);
+                    isTyping = false;
+                }
+                
+                stopBtn.style.display = 'block';
+                isTyping = true;
+                
                 element.innerHTML = '';
                 element.className = 'ai-response ' + language;
                 
-                let index = 0;
+                const formattedText = formatResponse(text, language);
+                const lines = formattedText.split('</div><div class="response-line">');
+                currentResponseLines = lines;
+                currentLineIndex = 0;
                 
-                function processNextChar() {
-                    if (index >= text.length) return;
+                function typeNextLine() {
+                    if (!isTyping || currentLineIndex >= currentResponseLines.length) {
+                        stopBtn.style.display = 'none';
+                        isTyping = false;
+                        return;
+                    }
                     
-                    const char = text[index];
-                    const charSpan = document.createElement('span');
-                    charSpan.className = 'char';
-                    charSpan.textContent = char;
-                    charSpan.style.animationDelay = `${index * speed}ms`;
-                    element.appendChild(charSpan);
+                    // Keep only last 3 lines
+                    if (currentLineIndex >= 3) {
+                        const lineElements = element.querySelectorAll('.response-line');
+                        if (lineElements.length >= 3) {
+                            lineElements[0].remove();
+                        }
+                    }
                     
-                    index++;
-                    setTimeout(processNextChar, speed);
+                    const currentLine = currentResponseLines[currentLineIndex];
+                    const lineDiv = document.createElement('div');
+                    lineDiv.className = 'response-line';
+                    lineDiv.innerHTML = currentLine;
+                    
+                    element.appendChild(lineDiv);
+                    currentLineIndex++;
+                    
+                    // Scroll to bottom
+                    aiResponseContainer.scrollTop = aiResponseContainer.scrollHeight;
+                    
+                    currentTypingTimeout = setTimeout(typeNextLine, speed * 10);
                 }
                 
-                processNextChar();
+                typeNextLine();
             }
+            
+            // Stop typing function
+            function stopTyping() {
+                if (currentTypingTimeout) {
+                    clearTimeout(currentTypingTimeout);
+                    currentTypingTimeout = null;
+                }
+                isTyping = false;
+                stopBtn.style.display = 'none';
+                
+                // Show all remaining lines immediately
+                if (currentLineIndex < currentResponseLines.length) {
+                    for (let i = currentLineIndex; i < currentResponseLines.length; i++) {
+                        if (currentLineIndex >= 3) {
+                            const lineElements = aiResponse.querySelectorAll('.response-line');
+                            if (lineElements.length >= 3) {
+                                lineElements[0].remove();
+                            }
+                        }
+                        
+                        const lineDiv = document.createElement('div');
+                        lineDiv.className = 'response-line';
+                        lineDiv.innerHTML = currentResponseLines[i];
+                        aiResponse.appendChild(lineDiv);
+                        currentLineIndex++;
+                    }
+                    aiResponseContainer.scrollTop = aiResponseContainer.scrollHeight;
+                }
+            }
+            
+            // Copy code function
+            window.copyCode = function(button) {
+                const codeBlock = button.parentElement;
+                const codeText = codeBlock.textContent.replace('📋 نسخ', '').trim();
+                
+                navigator.clipboard.writeText(codeText).then(() => {
+                    const originalText = button.textContent;
+                    button.textContent = '✓ تم النسخ';
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                    }, 2000);
+                });
+            };
             
             // Build conversation context
             function buildConversationContext() {
@@ -500,13 +651,13 @@
                         الرسالة الجديدة من سيدي ياسين: "${message}"
                         
                         التعليمات:
-                        - رد بشكل طبيعي وكامل
+                        - رد بشكل منسق مع الأسطر والترقيم
+                        - استخدم القوائم والنقاط عندما يكون ذلك مناسباً
+                        - إذا كتبت كوداً برمجياً، ضعه بين علامات \`\`\`
                         - تذكر كل ما سبق في المحادثة
                         - استمر في السياق الطبيعي
-                        - لا تختصر إلا إذا طلب منك ذلك
-                        - استخدم لغة محادثة طبيعية
                         - نادني دائماً بـ "سيدي ياسين"
-                        - كن مفيداً وودوداً`
+                        - كن مفيداً وواضحاً`
                         : `You are Delta, the loyal assistant to Master Yacine.
                         
                         Previous context:
@@ -515,19 +666,19 @@
                         New message from Master Yacine: "${message}"
                         
                         Instructions:
-                        - Respond naturally and completely
+                        - Respond with formatted lines and punctuation
+                        - Use lists and bullet points when appropriate
+                        - If writing code, put it between \`\`\` marks
                         - Remember everything from previous conversation
                         - Continue the natural context
-                        - Don't shorten unless asked
-                        - Use natural conversation language
                         - Always call me "Master Yacine"
-                        - Be helpful and friendly`;
+                        - Be helpful and clear`;
                     
                     const response = await ai.models.generateContent({
                         model: "gemini-2.0-flash",
                         contents: prompt,
                         generationConfig: {
-                            maxOutputTokens: 500,
+                            maxOutputTokens: 800,
                             temperature: 0.7
                         }
                     });
@@ -552,7 +703,6 @@
                     console.error("Error with Gemini AI:", error);
                     thinkingIndicator.style.display = 'none';
                     
-                    // Add error response to history
                     conversationHistory.push({
                         role: 'assistant',
                         content: language === 'arabic' ? "عذراً سيدي، جاري إصلاح الاتصال" : "Sorry Master, fixing connection",
@@ -576,6 +726,9 @@
                 }
             });
             
+            // Stop button event
+            stopBtn.addEventListener('click', stopTyping);
+            
             // Send message function
             async function sendMessage() {
                 const message = chatInput.value.trim();
@@ -583,7 +736,7 @@
                     const detectedLanguage = detectLanguage(message);
                     const response = await getAIResponse(message, detectedLanguage);
                     
-                    typeText(aiResponse, response, detectedLanguage);
+                    typeTextWithLines(aiResponse, response, detectedLanguage);
                     await speakText(response, detectedLanguage);
                     
                     chatInput.value = '';
@@ -600,26 +753,11 @@
                 }
             });
             
-            // Clear conversation history (for testing)
-            function clearHistory() {
-                if (confirm('هل تريد مسح تاريخ المحادثة؟')) {
-                    conversationHistory = [];
-                    localStorage.removeItem('deltaConversationHistory');
-                    typeText(aiResponse, "تم مسح الذاكرة يا سيدي ياسين", 'arabic');
-                }
-            }
-            
-            // Add right-click to clear history
-            aiResponseContainer.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                clearHistory();
-            });
-            
             // Initialize
             loadConversationHistory();
             
             setTimeout(() => {
-                speakText("جاهز لخدمتك يا سيدي ياسين، أتذكر كل محادثاتنا السابقة", 'arabic');
+                speakText("جاهز لخدمتك يا سيدي ياسين", 'arabic');
             }, 1000);
         });
     </script>
