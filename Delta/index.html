@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delta Personal Assistant</title>
+    <title>Delta Personal Assistant - 3D Atom</title>
+    <script type="importmap">
+    {
+        "imports": {
+            "@google/genai": "https://esm.run/@google/genai"
+        }
+    }
+    </script>
     <style>
         * {
             margin: 0;
@@ -20,26 +27,26 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         #atom {
             position: relative;
             width: 300px;
             height: 300px;
-            margin: auto;
+            margin: 10px auto;
         }
         
         #nucleus, .orbit, .electron {
             position: absolute;
             top: 0;
-            left: 0;
             right: 0;
             bottom: 0;
-            margin: auto;
+            left: 0;
             width: 25px;
             height: 25px;
             border-radius: 50%;
+            margin: auto;
         }
         
         #nucleus {
@@ -57,23 +64,25 @@
         }
         
         .orbit:before {
-            content: "";
+            content: " ";
             position: absolute;
             z-index: -1;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0px;
+            left: 0px;
+            right: 0px;
+            bottom: 0px;
             border: 0.5px solid rgba(255, 255, 255, 0.1);
             border-radius: 50%;
         }
         
         .electron {
+            position: relative;
             top: 95px;
             width: 10px;
             height: 10px;
             background: #fff;
             box-shadow: 0 0 15px #fff;
+            border-radius: 50%;
             transform: translateX(100px);
             animation: electronAnimation 4s infinite linear;
         }
@@ -119,6 +128,7 @@
             align-items: center;
             z-index: 1000;
             color: white;
+            transition: opacity 0.5s ease;
         }
         
         .delta-logo {
@@ -162,40 +172,45 @@
         }
         
         /* AI Response Text */
-        .ai-response {
+        .ai-response-container {
             position: fixed;
             bottom: 20px;
             left: 20px;
-            color: white;
-            font-size: 16px;
             max-width: 500px;
             opacity: 0;
-            transition: opacity 0.3s ease;
-            line-height: 1.5;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 10px;
+            transition: opacity 0.5s ease;
         }
         
-        .ai-response.show {
+        .ai-response-container.show {
             opacity: 1;
         }
         
-        .response-text {
-            margin: 0;
+        .ai-response {
+            color: white;
+            font-size: 16px;
+            line-height: 1.5;
             word-spacing: normal;
             letter-spacing: normal;
+            padding: 10px;
+            border-radius: 5px;
+            background: rgba(33, 150, 243, 0.1);
         }
         
-        .arabic-text {
+        .ai-response.arabic {
             direction: rtl;
             text-align: right;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        .english-text {
+        .ai-response.english {
             direction: ltr;
             text-align: left;
+        }
+        
+        .char {
+            display: inline;
+            opacity: 0;
+            animation: charAppear 0.05s forwards;
         }
         
         /* Chat Interface */
@@ -303,27 +318,54 @@
         .thinking-dot:nth-child(2) { animation-delay: -0.16s; }
 
         @keyframes electronAnimation {
-            0% { transform: rotateZ(0deg) translateX(100px) rotateZ(0deg) rotateY(-65deg); }
-            100% { transform: rotateZ(360deg) translateX(100px) rotateZ(-360deg) rotateY(-65deg); }
+            0% { 
+                transform: rotateZ(0deg) translateX(100px) rotateZ(-0deg) rotateY(-65deg);
+            }
+            100% { 
+                transform: rotateZ(360deg) translateX(100px) rotateZ(-360deg) rotateY(-65deg);
+            }
         }
         
         @keyframes orbitSpecial {
-            0% { border-top: 1px solid rgba(255, 255, 255, 0.5); border-right: none; border-bottom: none; border-left: none; }
-            25% { border-top: none; border-right: 1px solid rgba(255, 255, 255, 0.5); border-bottom: none; border-left: none; }
-            50% { border-top: none; border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.5); border-left: none; }
-            75% { border-top: none; border-right: none; border-bottom: none; border-left: 1px solid rgba(255, 255, 255, 0.5); }
-            100% { border-top: 1px solid rgba(255, 255, 255, 0.5); border-right: none; border-bottom: none; border-left: none; }
+            0% { 
+                border: 0;
+                border-top: 1px solid rgba(255, 255, 255, 0.5);
+            }
+            35% { 
+                border: 0;
+                border-right: 1px solid rgba(255, 255, 255, 0.5);
+            }
+            70% { 
+                border: 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            }
+            100% { 
+                border: 0;
+                border-left: 1px solid rgba(255, 255, 255, 0.5);
+            }
         }
         
         @keyframes shining {
-            0% { box-shadow: 0 0 0 transparent; }
-            50% { box-shadow: 0 0 40px #fff; }
-            100% { box-shadow: 0 0 0 transparent; }
+            0% {
+                box-shadow: 0 0 0 transparent;
+            }
+            50% { 
+                box-shadow: 0 0 40px #fff;
+            }
+            100% { 
+                box-shadow: 0 0 0 transparent;
+            }
         }
         
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes charAppear {
+            to {
+                opacity: 1;
+            }
         }
         
         @keyframes thinking {
@@ -338,7 +380,7 @@
         <div class="delta-logo">Δ</div>
         <div class="personal-assistant-text">Delta Personal Assistant</div>
         <div class="user-name">For Yacine</div>
-        <div class="loading-text">جاري التحميل...</div>
+        <div class="loading-text">جاري تهيئة النظام...</div>
         <div class="loading-indicator">
             <div class="loading-circle"></div>
             <span>Loading</span>
@@ -346,8 +388,8 @@
     </div>
 
     <!-- AI Response Text -->
-    <div id="aiResponse" class="ai-response">
-        <p id="responseText" class="response-text"></p>
+    <div id="aiResponseContainer" class="ai-response-container">
+        <div id="aiResponse" class="ai-response"></div>
     </div>
 
     <!-- Chat Interface -->
@@ -356,7 +398,7 @@
     </div>
     
     <div class="chat-input-container" id="chatInputContainer">
-        <input type="text" class="chat-input" id="chatInput" placeholder="Type your message...">
+        <input type="text" class="chat-input" id="chatInput" placeholder="Type your message to Delta...">
         <button class="send-button" id="sendButton">Send</button>
         <div class="thinking-indicator" id="thinkingIndicator">
             <span>Delta is thinking</span>
@@ -382,11 +424,17 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { GoogleGenAI } from "@google/genai";
+
+        const ai = new GoogleGenAI({ 
+            apiKey: "AIzaSyBAeAvYROvEfBlMXfHdxoJcofKwhS4xDBs" 
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             const loadingScreen = document.getElementById('loadingScreen');
+            const aiResponseContainer = document.getElementById('aiResponseContainer');
             const aiResponse = document.getElementById('aiResponse');
-            const responseText = document.getElementById('responseText');
             const chatButton = document.getElementById('chatButton');
             const chatInputContainer = document.getElementById('chatInputContainer');
             const chatInput = document.getElementById('chatInput');
@@ -395,121 +443,163 @@
             
             let isChatOpen = false;
             
-            // Detect language function
+            // Detect language
             function detectLanguage(text) {
-                const arabicPattern = /[\u0600-\u06FF]/;
-                return arabicPattern.test(text) ? 'arabic' : 'english';
+                const arabicChars = /[\u0600-\u06FF]/;
+                return arabicChars.test(text) ? 'arabic' : 'english';
             }
             
-            // Simple text-to-speech function
+            // Improved Text-to-Speech function
             function speakText(text, language) {
-                if ('speechSynthesis' in window) {
-                    // Cancel any ongoing speech
-                    window.speechSynthesis.cancel();
-                    
-                    const utterance = new SpeechSynthesisUtterance();
-                    utterance.text = text;
-                    utterance.volume = 1;
-                    utterance.rate = 0.8;
-                    utterance.pitch = 1;
-                    
-                    // Set language
-                    if (language === 'arabic') {
-                        utterance.lang = 'ar-SA';
-                        // Try to find Arabic voice
-                        const voices = speechSynthesis.getVoices();
-                        const arabicVoice = voices.find(voice => 
-                            voice.lang.includes('ar') || voice.lang.includes('AR')
-                        );
-                        if (arabicVoice) {
-                            utterance.voice = arabicVoice;
+                return new Promise((resolve) => {
+                    if ('speechSynthesis' in window && text.trim()) {
+                        // Cancel any ongoing speech
+                        window.speechSynthesis.cancel();
+                        
+                        const speech = new SpeechSynthesisUtterance();
+                        speech.text = text;
+                        speech.volume = 1;
+                        speech.rate = 0.8;
+                        speech.pitch = 1;
+                        
+                        // Set language
+                        if (language === 'arabic') {
+                            speech.lang = 'ar-SA';
+                            // Try to find Arabic voice
+                            const voices = window.speechSynthesis.getVoices();
+                            const arabicVoice = voices.find(voice => 
+                                voice.lang.includes('ar') || 
+                                voice.lang.includes('AR') ||
+                                voice.lang.startsWith('ar')
+                            );
+                            if (arabicVoice) {
+                                speech.voice = arabicVoice;
+                            }
+                        } else {
+                            speech.lang = 'en-US';
                         }
+                        
+                        speech.onend = resolve;
+                        speech.onerror = resolve;
+                        
+                        // Small delay to ensure cancellation is processed
+                        setTimeout(() => {
+                            window.speechSynthesis.speak(speech);
+                        }, 100);
                     } else {
-                        utterance.lang = 'en-US';
+                        resolve();
+                    }
+                });
+            }
+            
+            // Character-by-character animation with proper spacing
+            function typeText(element, container, text, language, speed = 30) {
+                // Clear previous content
+                element.innerHTML = '';
+                
+                // Set language class
+                element.className = 'ai-response ' + language;
+                container.className = 'ai-response-container show';
+                
+                let index = 0;
+                let currentWord = '';
+                let inTag = false;
+                
+                function processNextChar() {
+                    if (index >= text.length) {
+                        return;
                     }
                     
-                    window.speechSynthesis.speak(utterance);
-                }
-            }
-            
-            // Display response text
-            function showResponse(text, language) {
-                responseText.textContent = text;
-                responseText.className = 'response-text ' + (language === 'arabic' ? 'arabic-text' : 'english-text');
-                aiResponse.classList.add('show');
-                
-                // Auto-hide after 5 seconds
-                setTimeout(() => {
-                    aiResponse.classList.remove('show');
-                }, 5000);
-            }
-            
-            // Generate smart response
-            function generateResponse(message, language) {
-                const lowerMessage = message.toLowerCase();
-                
-                if (language === 'arabic') {
-                    if (lowerMessage.includes('مرحبا') || lowerMessage.includes('اهلا') || lowerMessage.includes('السلام')) {
-                        return "مرحباً ياسين! كيف يمكنني مساعدتك؟";
-                    } else if (lowerMessage.includes('كيف حالك')) {
-                        return "أنا بخير، شكراً لك!";
-                    } else if (lowerMessage.includes('اسمك')) {
-                        return "أنا Delta، مساعدك الشخصي";
-                    } else if (lowerMessage.includes('شكرا')) {
-                        return "العفو ياسين!";
-                    } else if (lowerMessage.includes('الوقت')) {
-                        return `الساعة الآن ${new Date().toLocaleTimeString('ar-EG')}`;
-                    } else if (lowerMessage.includes('مساعدة')) {
-                        return "يمكنني الإجابة على أسئلتك بالعربية أو الإنجليزية";
-                    } else {
-                        return "فهمت سؤالك. هل تحتاج مساعدة أخرى؟";
-                    }
-                } else {
-                    if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
-                        return "Hello Yacine! How can I help you?";
-                    } else if (lowerMessage.includes('how are you')) {
-                        return "I'm good, thank you!";
-                    } else if (lowerMessage.includes('your name')) {
-                        return "I'm Delta, your personal assistant";
-                    } else if (lowerMessage.includes('thank')) {
-                        return "You're welcome Yacine!";
-                    } else if (lowerMessage.includes('time')) {
-                        return `Current time is ${new Date().toLocaleTimeString()}`;
-                    } else if (lowerMessage.includes('help')) {
-                        return "I can answer your questions in Arabic or English";
-                    } else {
-                        return "I understand. Need anything else?";
-                    }
-                }
-            }
-            
-            // Handle message sending
-            function sendMessage() {
-                const message = chatInput.value.trim();
-                if (message) {
-                    // Detect language
-                    const language = detectLanguage(message);
+                    const char = text[index];
                     
-                    // Show thinking indicator
+                    // Handle HTML tags if any
+                    if (char === '<') {
+                        inTag = true;
+                        currentWord += char;
+                    } else if (char === '>') {
+                        inTag = false;
+                        currentWord += char;
+                        // Add the complete tag
+                        const span = document.createElement('span');
+                        span.innerHTML = currentWord;
+                        element.appendChild(span);
+                        currentWord = '';
+                    } else if (inTag) {
+                        currentWord += char;
+                    } else {
+                        // Normal text character
+                        if (char === ' ' || char === '\n' || index === text.length - 1) {
+                            // Add space or end of text - create word element
+                            if (currentWord || char !== ' ') {
+                                if (index === text.length - 1 && char !== ' ') {
+                                    currentWord += char;
+                                }
+                                
+                                const charSpan = document.createElement('span');
+                                charSpan.className = 'char';
+                                charSpan.textContent = currentWord + (char === ' ' ? ' ' : '');
+                                charSpan.style.animationDelay = `${index * speed}ms`;
+                                element.appendChild(charSpan);
+                                
+                                currentWord = '';
+                            }
+                            
+                            if (char === '\n') {
+                                element.appendChild(document.createElement('br'));
+                            }
+                        } else {
+                            currentWord += char;
+                        }
+                    }
+                    
+                    index++;
+                    setTimeout(processNextChar, speed);
+                }
+                
+                processNextChar();
+            }
+            
+            // Gemini AI response function
+            async function getAIResponse(message, language) {
+                try {
                     thinkingIndicator.style.display = 'flex';
                     
-                    // Simulate AI processing delay
-                    setTimeout(() => {
-                        thinkingIndicator.style.display = 'none';
+                    const languageInstruction = language === 'arabic' 
+                        ? 'رد بالعربية فقط. اجعل الرد قصيراً ومباشراً.' 
+                        : 'Respond in English only. Keep response short and direct.';
+                    
+                    const response = await ai.models.generateContent({
+                        model: "gemini-2.0-flash",
+                        contents: `You are Delta, Yacine's personal assistant.
                         
-                        // Generate response
-                        const response = generateResponse(message, language);
+                        User message: "${message}"
                         
-                        // Display response
-                        showResponse(response, language);
+                        Instructions:
+                        - ${languageInstruction}
+                        - Maximum 15 words
+                        - Be concise and helpful
+                        - No long explanations
                         
-                        // Speak response
-                        speakText(response, language);
-                        
-                        // Clear input
-                        chatInput.value = '';
-                        
-                    }, 1000);
+                        Short response:`
+                    });
+                    
+                    thinkingIndicator.style.display = 'none';
+                    
+                    // Clean response and ensure it's short
+                    let finalResponse = response.text.trim();
+                    
+                    // Remove any markdown or special formatting
+                    finalResponse = finalResponse.replace(/\*\*/g, '');
+                    finalResponse = finalResponse.replace(/\*/g, '');
+                    
+                    return finalResponse;
+                    
+                } catch (error) {
+                    console.error("Error with Gemini AI:", error);
+                    thinkingIndicator.style.display = 'none';
+                    return language === 'arabic' 
+                        ? "عذراً، حدث خطأ في الاتصال" 
+                        : "Sorry, connection error";
                 }
             }
             
@@ -524,6 +614,27 @@
                 }
             });
             
+            // Send message function
+            async function sendMessage() {
+                const message = chatInput.value.trim();
+                if (message) {
+                    // Detect language
+                    const detectedLanguage = detectLanguage(message);
+                    
+                    // Get AI response
+                    const response = await getAIResponse(message, detectedLanguage);
+                    
+                    // Display response with character animation
+                    typeText(aiResponse, aiResponseContainer, response, detectedLanguage);
+                    
+                    // Speak the response
+                    await speakText(response, detectedLanguage);
+                    
+                    // Clear input
+                    chatInput.value = '';
+                }
+            }
+            
             // Send message on button click
             sendButton.addEventListener('click', sendMessage);
             
@@ -534,31 +645,39 @@
                 }
             });
             
-            // Initialize voices for speech synthesis
+            // Initialize voices
             function initializeVoices() {
                 return new Promise((resolve) => {
-                    if (window.speechSynthesis.getVoices().length > 0) {
+                    const voices = window.speechSynthesis.getVoices();
+                    if (voices.length > 0) {
                         resolve();
                     } else {
-                        window.speechSynthesis.onvoiceschanged = resolve;
+                        window.speechSynthesis.onvoiceschanged = () => {
+                            resolve();
+                        };
                     }
                 });
             }
             
-            // Start the application
+            // Initial loading sequence
             initializeVoices().then(() => {
-                // Hide loading screen after 2 seconds
                 setTimeout(() => {
                     loadingScreen.style.opacity = '0';
+                    
                     setTimeout(() => {
                         loadingScreen.style.display = 'none';
                         
                         // Show welcome message
-                        const welcomeMessage = "Hello Yacine! Ready to help.";
-                        showResponse(welcomeMessage, 'english');
-                        speakText(welcomeMessage, 'english');
+                        const welcomeMessage = "Hello Yacine! How can I help you today?";
+                        typeText(aiResponse, aiResponseContainer, welcomeMessage, 'english');
+                        
+                        // Speak welcome after a short delay
+                        setTimeout(() => {
+                            speakText(welcomeMessage, 'english');
+                        }, 1000);
                         
                     }, 500);
+                    
                 }, 2000);
             });
         });
