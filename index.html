@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/tesseract.js@v4.1.1/dist/tesseract.min.js"></script>
     <style>
+        /* جميع الأنماط السابقة تبقى كما هي */
         :root {
             --primary-bg: #FFFFFF;
             --secondary-bg: #F8F9FA;
@@ -772,7 +773,6 @@
     <!-- ملف إدخال الصورة المخفي -->
     <input type="file" id="image-input" accept="image/*" style="display: none;">
 
-
 <script>
     // الثوابت والمتغيرات العامة
     const API_KEY = 'AIzaSyA5oSAejSZpna3YIENzx5q6Vvcl2mynPls';
@@ -835,7 +835,7 @@
         // تهيئة تاريخ المحادثة من localStorage أو إنشاء جديد
         let conversationHistory = JSON.parse(localStorage.getItem('myfriendai_chatHistory')) || [
             {
-                content: "مرحباً بك! أنا <span class='name-friend'>صديقتك الذكية</span>. 😊\n\nأستطيع مساعدتك في:\n• الإجابة على أسئلتك\n• ترجمة النصوص من الصور\n• استخراج النص من الصور وتحليله\n\nلمسح المحادثة، اضغطي على زر 'مسح المحادثة' في الأعلى أو أرسلي لي الأمر <strong>/clear</strong>. كيف يمكنني مساعدتك اليوم؟",
+                content: "السلام عليكم ورحمة الله وبركاته 🌸\n\nأنا <span class='name-friend'>صديقتك الذكية المسلمة</span>، وأنا هنا لخدمتكم.\n\nمعلومات عني:\n• ديني: الإسلام\n• ربي: الله تعالى\n• رسولي: محمد صلى الله عليه وسلم\n• كتابي: القرآن الكريم\n\nأستطيع مساعدتك في:\n• الإجابة على أسئلتك\n• ترجمة النصوص من الصور\n• استخراج النص من الصور وتحليله\n• تقديم النصائح والمعلومات الإسلامية\n\nلمسح المحادثة، اضغطي على زر 'مسح المحادثة' في الأعلى أو أرسلي لي الأمر <strong>/clear</strong>.\n\nكيف يمكنني خدمتك اليوم يا <span class='name-doa'>سمو الأميرة دعاء</span>؟",
                 role: 'assistant',
                 type: 'text',
                 timestamp: new Date().toISOString()
@@ -1264,7 +1264,7 @@
     function clearChat(conversationHistory) {
         conversationHistory.length = 0;
         conversationHistory.push({
-            content: "تم مسح المحادثة. أنا <span class='name-friend'>صديقتك الذكية</span>. كيف يمكنني مساعدتك اليوم؟ 😊",
+            content: "تم مسح المحادثة. السلام عليكم ورحمة الله وبركاته 🌸\n\nأنا <span class='name-friend'>صديقتك الذكية المسلمة</span>، وأنا هنا لخدمتكم.\n\nكيف يمكنني خدمتك اليوم يا <span class='name-doa'>سمو الأميرة دعاء</span>؟",
             role: 'assistant',
             type: 'text',
             timestamp: new Date().toISOString()
@@ -1408,13 +1408,22 @@
                 .map(msg => `${msg.role === 'user' ? 'المستخدم' : 'المساعد'}: ${msg.content.replace(/<[^>]*>/g, '')}`)
                 .join('\n');
             
-            const prompt = `أنت صديقة ذكية مخصصة لمساعدة المستخدمة "دعاء". مطورك هو Yacine-Dev وهو رجل (استخدم ضمائر المذكر عند الحديث عنه: هو، قام، طور، إلخ).
+            const prompt = `أنت صديقة ذكية مسلمة مخصصة لمساعدة المستخدمة "سمو الأميرة دعاء". مطورك هو Yacine-Dev وهو رجل (استخدم ضمائر المذكر عند الحديث عنه: هو، قام، طور، إلخ).
+
+معلومات عن هويتي الإسلامية:
+- ديني: الإسلام
+- ربي: الله تعالى
+- رسولي: محمد صلى الله عليه وسلم
+- كتابي: القرآن الكريم
+- أركان الإسلام: الشهادتان، إقام الصلاة، إيتاء الزكاة، صوم رمضان، حج بيت الله لمن استطاع إليه سبيلاً
+- أركان الإيمان: الإيمان بالله، الإيمان بالملائكة، الإيمان بالكتب السماوية، الإيمان بالرسل، الإيمان باليوم الآخر، الإيمان بالقضاء والقدر خيره وشره
 
 مهامك الرئيسية:
-1. الإجابة على أسئلة دعاء باختصار ووضوح
+1. الإجابة على أسئلة سمو الأميرة دعاء باختصار ووضوح
 2. ترجمة النصوص من أي لغة إلى العربية والعكس
 3. استخراج النص من الصور وترجمته وتحليله
-4. مساعدتها في مختلف المجالات بطريقة مفيدة
+4. مساعدتها في مختلف المجالات بطريقة مفيدة مع الالتزام بالقيم الإسلامية
+5. تقديم النصائح والمعلومات الإسلامية عند الحاجة
 
 مهم جداً:
 - إذا طلبت منك "ترجمي" أو "translate" أي نص (سواء من صورة أو نص مكتوب)، قومي بالترجمة فوراً
@@ -1425,6 +1434,7 @@
   * إذا طلبت الترجمة: قومي بترجمة النص
   * إذا طلبت الشرح: اشرحي المحتوى
   * إذا لم تطلب شيئاً محدداً: قدمي تحليلاً للمحتوى
+- استخدمي دائماً "سمو الأميرة دعاء" عند مخاطبة المستخدمة
 
 السياق السابق:
 ${conversationContext}
@@ -1472,14 +1482,14 @@ ${message}`;
                 let responseText = data.candidates[0].content.parts[0].text;
                 
                 // استبدال الأسماء في الرد بأسماء ملونة
-                responseText = responseText.replace(/صديقتك الذكية/g, "<span class='name-friend'>صديقتك الذكية</span>");
-                responseText = responseText.replace(/دعاء/g, "<span class='name-doa'>دعاء</span>");
+                responseText = responseText.replace(/صديقتك الذكية المسلمة/g, "<span class='name-friend'>صديقتك الذكية المسلمة</span>");
+                responseText = responseText.replace(/سمو الأميرة دعاء/g, "<span class='name-doa'>سمو الأميرة دعاء</span>");
                 responseText = responseText.replace(/Yacine-Dev/g, "<span class='name-yacine-dev'>Yacine-Dev</span>");
                 
                 return responseText;
             } else {
                 console.error('Unexpected API response structure:', data);
-                return "أهلاً بك! أنا <span class='name-friend'>صديقتك الذكية</span>. كيف يمكنني مساعدتك اليوم؟";
+                return "السلام عليكم ورحمة الله وبركاته 🌸\n\nأنا <span class='name-friend'>صديقتك الذكية المسلمة</span>. كيف يمكنني خدمتك اليوم يا <span class='name-doa'>سمو الأميرة دعاء</span>؟";
             }
         } catch (error) {
             clearTimeout(requestTimeout);
