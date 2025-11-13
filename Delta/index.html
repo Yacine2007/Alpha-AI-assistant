@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delta Personal Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        
+        #atom {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: auto;
+        }
+        
+        #nucleus, .orbit, .electron {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+        }
+        
+        #nucleus {
+            background: #fff;
+            box-shadow: 0 0 15px #fff;
+            animation: shining 4s infinite linear;
+        }
+        
+        .orbit {
+            width: 200px;
+            height: 200px;
+            border: 0;
+            transform-style: preserve-3d;
+            animation: orbitSpecial 4s infinite linear;
+        }
+        
+        .orbit:before {
+            content: "";
+            position: absolute;
+            z-index: -1;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 0.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        .electron {
+            top: 95px;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            box-shadow: 0 0 15px #fff;
+            transform: translateX(100px);
+            animation: electronAnimation 4s infinite linear;
+        }
+        
+        .orbit:nth-child(2) {
+            transform: rotateY(65deg) rotateX(5deg);
+            animation-delay: -2s;
+        }
+        
+        .orbit:nth-child(2) .electron {
+            animation-delay: -2s;
+        }
+        
+        .orbit:nth-child(3) {
+            transform: rotateY(65deg) rotateX(-54deg);
+            animation-duration: 3s;
+        }
+        
+        .orbit:nth-child(3) .electron {
+            animation-duration: 3s;
+        }
+        
+        .orbit:nth-child(4) {
+            transform: rotateY(65deg) rotateX(54deg);
+            animation-duration: 5s;
+        }
+        
+        .orbit:nth-child(4) .electron {
+            animation-duration: 5s;
+        }
+        
+        /* Loading Screen */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: white;
+        }
+        
+        .delta-logo {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+        
+        .personal-assistant-text {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #2196F3;
+        }
+        
+        .user-name {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: #fff;
+        }
+        
+        .loading-text {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: #fff;
+        }
+        
+        .loading-indicator {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .loading-circle {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #fff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        /* AI Response Text */
+        .ai-response {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            font-size: 16px;
+            max-width: 500px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            line-height: 1.5;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+        }
+        
+        .ai-response.show {
+            opacity: 1;
+        }
+        
+        .response-text {
+            margin: 0;
+            word-spacing: normal;
+            letter-spacing: normal;
+        }
+        
+        .arabic-text {
+            direction: rtl;
+            text-align: right;
+            font-family: Arial, sans-serif;
+        }
+        
+        .english-text {
+            direction: ltr;
+            text-align: left;
+        }
+        
+        /* Chat Interface */
+        .chat-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: #2196F3;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .chat-button:hover {
+            transform: scale(1.1);
+            background: #1976D2;
+        }
+        
+        .keyboard-icon {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .chat-input-container {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: rgba(30, 30, 30, 0.95);
+            border-radius: 10px;
+            padding: 15px;
+            width: 350px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 99;
+            border: 1px solid #2196F3;
+        }
+        
+        .chat-input-container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .chat-input {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #2196F3;
+            border-radius: 5px;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: #1976D2;
+        }
+        
+        .send-button {
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: #2196F3;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .send-button:hover {
+            background: #1976D2;
+        }
+        
+        .thinking-indicator {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            color: #2196F3;
+            font-size: 0.9rem;
+        }
+        
+        .thinking-dots {
+            display: flex;
+            gap: 3px;
+        }
+        
+        .thinking-dot {
+            width: 6px;
+            height: 6px;
+            background: #2196F3;
+            border-radius: 50%;
+            animation: thinking 1.4s infinite ease-in-out;
+        }
+        
+        .thinking-dot:nth-child(1) { animation-delay: -0.32s; }
+        .thinking-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes electronAnimation {
+            0% { transform: rotateZ(0deg) translateX(100px) rotateZ(0deg) rotateY(-65deg); }
+            100% { transform: rotateZ(360deg) translateX(100px) rotateZ(-360deg) rotateY(-65deg); }
+        }
+        
+        @keyframes orbitSpecial {
+            0% { border-top: 1px solid rgba(255, 255, 255, 0.5); border-right: none; border-bottom: none; border-left: none; }
+            25% { border-top: none; border-right: 1px solid rgba(255, 255, 255, 0.5); border-bottom: none; border-left: none; }
+            50% { border-top: none; border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.5); border-left: none; }
+            75% { border-top: none; border-right: none; border-bottom: none; border-left: 1px solid rgba(255, 255, 255, 0.5); }
+            100% { border-top: 1px solid rgba(255, 255, 255, 0.5); border-right: none; border-bottom: none; border-left: none; }
+        }
+        
+        @keyframes shining {
+            0% { box-shadow: 0 0 0 transparent; }
+            50% { box-shadow: 0 0 40px #fff; }
+            100% { box-shadow: 0 0 0 transparent; }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes thinking {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen">
+        <div class="delta-logo">Δ</div>
+        <div class="personal-assistant-text">Delta Personal Assistant</div>
+        <div class="user-name">For Yacine</div>
+        <div class="loading-text">جاري التحميل...</div>
+        <div class="loading-indicator">
+            <div class="loading-circle"></div>
+            <span>Loading</span>
+        </div>
+    </div>
+
+    <!-- AI Response Text -->
+    <div id="aiResponse" class="ai-response">
+        <p id="responseText" class="response-text"></p>
+    </div>
+
+    <!-- Chat Interface -->
+    <div class="chat-button" id="chatButton">
+        <div class="keyboard-icon">⌨️</div>
+    </div>
+    
+    <div class="chat-input-container" id="chatInputContainer">
+        <input type="text" class="chat-input" id="chatInput" placeholder="Type your message...">
+        <button class="send-button" id="sendButton">Send</button>
+        <div class="thinking-indicator" id="thinkingIndicator">
+            <span>Delta is thinking</span>
+            <div class="thinking-dots">
+                <div class="thinking-dot"></div>
+                <div class="thinking-dot"></div>
+                <div class="thinking-dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Atom Model -->
+    <div id="atom">
+        <div id="nucleus"></div>
+        <div class="orbit">
+            <div class="electron"></div>
+        </div>
+        <div class="orbit">
+            <div class="electron"></div>
+        </div>
+        <div class="orbit">
+            <div class="electron"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const aiResponse = document.getElementById('aiResponse');
+            const responseText = document.getElementById('responseText');
+            const chatButton = document.getElementById('chatButton');
+            const chatInputContainer = document.getElementById('chatInputContainer');
+            const chatInput = document.getElementById('chatInput');
+            const sendButton = document.getElementById('sendButton');
+            const thinkingIndicator = document.getElementById('thinkingIndicator');
+            
+            let isChatOpen = false;
+            
+            // Detect language function
+            function detectLanguage(text) {
+                const arabicPattern = /[\u0600-\u06FF]/;
+                return arabicPattern.test(text) ? 'arabic' : 'english';
+            }
+            
+            // Simple text-to-speech function
+            function speakText(text, language) {
+                if ('speechSynthesis' in window) {
+                    // Cancel any ongoing speech
+                    window.speechSynthesis.cancel();
+                    
+                    const utterance = new SpeechSynthesisUtterance();
+                    utterance.text = text;
+                    utterance.volume = 1;
+                    utterance.rate = 0.8;
+                    utterance.pitch = 1;
+                    
+                    // Set language
+                    if (language === 'arabic') {
+                        utterance.lang = 'ar-SA';
+                        // Try to find Arabic voice
+                        const voices = speechSynthesis.getVoices();
+                        const arabicVoice = voices.find(voice => 
+                            voice.lang.includes('ar') || voice.lang.includes('AR')
+                        );
+                        if (arabicVoice) {
+                            utterance.voice = arabicVoice;
+                        }
+                    } else {
+                        utterance.lang = 'en-US';
+                    }
+                    
+                    window.speechSynthesis.speak(utterance);
+                }
+            }
+            
+            // Display response text
+            function showResponse(text, language) {
+                responseText.textContent = text;
+                responseText.className = 'response-text ' + (language === 'arabic' ? 'arabic-text' : 'english-text');
+                aiResponse.classList.add('show');
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    aiResponse.classList.remove('show');
+                }, 5000);
+            }
+            
+            // Generate smart response
+            function generateResponse(message, language) {
+                const lowerMessage = message.toLowerCase();
+                
+                if (language === 'arabic') {
+                    if (lowerMessage.includes('مرحبا') || lowerMessage.includes('اهلا') || lowerMessage.includes('السلام')) {
+                        return "مرحباً ياسين! كيف يمكنني مساعدتك؟";
+                    } else if (lowerMessage.includes('كيف حالك')) {
+                        return "أنا بخير، شكراً لك!";
+                    } else if (lowerMessage.includes('اسمك')) {
+                        return "أنا Delta، مساعدك الشخصي";
+                    } else if (lowerMessage.includes('شكرا')) {
+                        return "العفو ياسين!";
+                    } else if (lowerMessage.includes('الوقت')) {
+                        return `الساعة الآن ${new Date().toLocaleTimeString('ar-EG')}`;
+                    } else if (lowerMessage.includes('مساعدة')) {
+                        return "يمكنني الإجابة على أسئلتك بالعربية أو الإنجليزية";
+                    } else {
+                        return "فهمت سؤالك. هل تحتاج مساعدة أخرى؟";
+                    }
+                } else {
+                    if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+                        return "Hello Yacine! How can I help you?";
+                    } else if (lowerMessage.includes('how are you')) {
+                        return "I'm good, thank you!";
+                    } else if (lowerMessage.includes('your name')) {
+                        return "I'm Delta, your personal assistant";
+                    } else if (lowerMessage.includes('thank')) {
+                        return "You're welcome Yacine!";
+                    } else if (lowerMessage.includes('time')) {
+                        return `Current time is ${new Date().toLocaleTimeString()}`;
+                    } else if (lowerMessage.includes('help')) {
+                        return "I can answer your questions in Arabic or English";
+                    } else {
+                        return "I understand. Need anything else?";
+                    }
+                }
+            }
+            
+            // Handle message sending
+            function sendMessage() {
+                const message = chatInput.value.trim();
+                if (message) {
+                    // Detect language
+                    const language = detectLanguage(message);
+                    
+                    // Show thinking indicator
+                    thinkingIndicator.style.display = 'flex';
+                    
+                    // Simulate AI processing delay
+                    setTimeout(() => {
+                        thinkingIndicator.style.display = 'none';
+                        
+                        // Generate response
+                        const response = generateResponse(message, language);
+                        
+                        // Display response
+                        showResponse(response, language);
+                        
+                        // Speak response
+                        speakText(response, language);
+                        
+                        // Clear input
+                        chatInput.value = '';
+                        
+                    }, 1000);
+                }
+            }
+            
+            // Toggle chat interface
+            chatButton.addEventListener('click', function() {
+                isChatOpen = !isChatOpen;
+                if (isChatOpen) {
+                    chatInputContainer.classList.add('show');
+                    chatInput.focus();
+                } else {
+                    chatInputContainer.classList.remove('show');
+                }
+            });
+            
+            // Send message on button click
+            sendButton.addEventListener('click', sendMessage);
+            
+            // Send message on Enter key
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // Initialize voices for speech synthesis
+            function initializeVoices() {
+                return new Promise((resolve) => {
+                    if (window.speechSynthesis.getVoices().length > 0) {
+                        resolve();
+                    } else {
+                        window.speechSynthesis.onvoiceschanged = resolve;
+                    }
+                });
+            }
+            
+            // Start the application
+            initializeVoices().then(() => {
+                // Hide loading screen after 2 seconds
+                setTimeout(() => {
+                    loadingScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                        
+                        // Show welcome message
+                        const welcomeMessage = "Hello Yacine! Ready to help.";
+                        showResponse(welcomeMessage, 'english');
+                        speakText(welcomeMessage, 'english');
+                        
+                    }, 500);
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>
