@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alpha AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-bg: #000000;
+            --secondary-bg: #000000;
+            --accent-blue: #0098FF;
+            --light-blue: #0081FF;
+            --text-primary: #f8f9fa;
+            --text-secondary: #adb5bd;
+            --chat-bubble-ai: #1F1F1F;
+            --chat-bubble-user: #0098FF;
+            --success-green: #4caf50;
+            --error-red: #FF1700;
+            --command-bg: #2A2A2A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        @font-face {
+            font-family: 'Inter';
+            src: url(https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2) format('woff2');
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-blue) var(--secondary-bg);
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: var(--secondary-bg);
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background-color: var(--accent-blue);
+            border-radius: 3px;
+        }
+
+        .message {
+            max-width: 90%;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease-out;
+            font-size: 0.95rem;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ai-message {
+            align-self: flex-start;
+            background-color: var(--chat-bubble-ai);
+            border: 1px solid #0098FF;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: var(--chat-bubble-user);
+            color: white;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            background: none;
+            padding: 0.5rem;
+            margin: 0.5rem;
+            border-radius: 1rem;
+            margin-bottom: 0.5rem;
+            border: 2px solid rgba(58, 134, 255, 0.15);
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--light-blue);
+            border-radius: 50%;
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingAnimation {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+
+        .input-container {
+            padding: 0.8rem;
+            background-color: var(--secondary-bg);
+            border-top: 1px solid #242424;
+            display: flex;
+            justify-content: center;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+            gap: 0.5rem;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 0.7rem 1rem;
+            border-radius: 50px;
+            border: 1px solid rgba(58, 134, 255, 0.3);
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            outline: none;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            resize: none;
+            line-height: 1.5;
+            min-height: 45px;
+            max-height: 120px;
+        }
+
+        #send-button, #mic-button, #command-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #000000;
+            color: white;
+            border: 1px solid #0098FF;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        #mic-button {
+            background-color: transparent;
+        }
+
+        #command-button {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        #send-button:hover, #command-button:hover, #mic-button:hover {
+            background-color: var(--accent-blue);
+            transform: scale(1.05);
+        }
+
+        /* Command Modal */
+        .command-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .command-modal-content {
+            background-color: var(--command-bg);
+            border: 2px solid var(--accent-blue);
+            border-radius: 15px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 80%;
+            overflow-y: auto;
+            padding: 1.2rem;
+        }
+
+        .command-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(58, 134, 255, 0.3);
+        }
+
+        .command-modal-title {
+            font-size: 1.3rem;
+            color: var(--accent-blue);
+        }
+
+        .close-command-modal {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.8rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .command-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .command-btn-grid {
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--accent-blue);
+            border-radius: 8px;
+            padding: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 80px;
+        }
+
+        .command-btn-grid:hover {
+            background-color: rgba(58, 134, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .command-icon {
+            font-size: 1.5rem;
+            color: var(--accent-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .command-name {
+            font-weight: bold;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .command-desc {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            line-height: 1.3;
+        }
+
+        .custom-command-section {
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        #custom-command-input {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: var(--primary-bg);
+            border: 1px solid var(--accent-blue);
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        #execute-custom-command {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        #execute-custom-command:hover {
+            background-color: var(--light-blue);
+        }
+
+        .file-browser-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #browse-files-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        #browse-files-btn:hover {
+            background-color: var(--light-blue);
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin: 0.3rem 0;
+        }
+
+        .success-message {
+            color: var(--success-green);
+        }
+
+        .error-message {
+            color: var(--error-red);
+        }
+
+        .pre-formatted {
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 0.8rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-messages" id="chat-messages">
+            <div class="message ai-message">
+                <strong>Alpha AI</strong><br><br>
+                Welcome to Alpha OS Assistant. I can help you with system management, troubleshooting, and executing commands.<br><br>
+                Use the <strong>/</strong> button for system commands or type your question.
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typing-indicator">
+            <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <div class="input-wrapper">
+                <button id="command-button" title="System Commands">/</button>
+                <textarea id="user-input" placeholder="Type your message or command..." autocomplete="off" rows="1"></textarea>
+                <button id="mic-button" title="Voice input">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button id="send-button" title="Send">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Command Modal -->
+    <div class="command-modal" id="command-modal">
+        <div class="command-modal-content">
+            <div class="command-modal-header">
+                <h2 class="command-modal-title">Alpha OS Commands</h2>
+                <button class="close-command-modal" id="close-command-modal">&times;</button>
+            </div>
+            
+            <div class="command-grid">
+                <div class="command-btn-grid" data-command="system-info">
+                    <div class="command-icon"><i class="fas fa-terminal"></i></div>
+                    <div class="command-name">System Info</div>
+                    <div class="command-desc">Show system details</div>
+                </div>
+                
+                <div class="command-btn-grid" data-command="disk-usage">
+                    <div class="command-icon"><i class="fas fa-hdd"></i></div>
+                    <div class="command-name">Disk Usage</div>
+                    <div class="command-desc">Check disk space</div>
+                </div>
+                
+                <div class="command-btn-grid" data-command="process-list">
+                    <div class="command-icon"><i class="fas fa-microchip"></i></div>
+                    <div class="command-name">Process List</div>
+                    <div class="command-desc">Running processes</div>
+                </div>
+                
+                <div class="command-btn-grid" data-command="update-system">
+                    <div class="command-icon"><i class="fas fa-sync-alt"></i></div>
+                    <div class="command-name">Update System</div>
+                    <div class="command-desc">Update packages</div>
+                </div>
+                
+                <div class="command-btn-grid" data-command="apt install">
+                    <div class="command-icon"><i class="fas fa-download"></i></div>
+                    <div class="command-name">Install Package</div>
+                    <div class="command-desc">Install software</div>
+                </div>
+                
+                <div class="command-btn-grid" data-command="apt remove">
+                    <div class="command-icon"><i class="fas fa-trash"></i></div>
+                    <div class="command-name">Remove Package</div>
+                    <div class="command-desc">Uninstall software</div>
+                </div>
+                
+                <div class="command-btn-grid" data-command="ls -la">
+                    <div class="command-icon"><i class="fas fa-folder"></i></div>
+                    <div class="command-name">List Files</div>
+                    <div class="command-desc">Directory listing</div>
+                </div>
+                
+                <div class="command-btn-grid" data-command="neofetch">
+                    <div class="command-icon"><i class="fas fa-info-circle"></i></div>
+                    <div class="command-name">System Fetch</div>
+                    <div class="command-desc">System overview</div>
+                </div>
+                
+                <div class="command-btn-grid" data-command="top -n 1">
+                    <div class="command-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="command-name">System Monitor</div>
+                    <div class="command-desc">Resource usage</div>
+                </div>
+                
+                <div class="command-btn-grid" data-command="ifconfig">
+                    <div class="command-icon"><i class="fas fa-network-wired"></i></div>
+                    <div class="command-name">Network Info</div>
+                    <div class="command-desc">Network status</div>
+                </div>
+                
+                <div class="command-btn-grid" data-command="pwd">
+                    <div class="command-icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="command-name">Current Dir</div>
+                    <div class="command-desc">Print directory</div>
+                </div>
+                
+                <div class="command-btn-grid" data-command="clear">
+                    <div class="command-icon"><i class="fas fa-broom"></i></div>
+                    <div class="command-name">Clear Screen</div>
+                    <div class="command-desc">Clean terminal</div>
+                </div>
+            </div>
+            
+            <div class="file-browser-section">
+                <button id="browse-files-btn">
+                    <i class="fas fa-folder-open"></i> Browse & Launch Files
+                </button>
+            </div>
+            
+            <div class="custom-command-section">
+                <input type="text" id="custom-command-input" placeholder="Enter custom system command...">
+                <button id="execute-custom-command">
+                    <i class="fas fa-terminal"></i> Execute Custom Command
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = 'AIzaSyBPCpRg9suPOAzjkpYSPOphs-aZIn4481M';
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const micButton = document.getElementById('mic-button');
+        const commandButton = document.getElementById('command-button');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const commandModal = document.getElementById('command-modal');
+        const closeCommandModal = document.getElementById('close-command-modal');
+        const customCommandInput = document.getElementById('custom-command-input');
+        const executeCustomCommand = document.getElementById('execute-custom-command');
+        const browseFilesBtn = document.getElementById('browse-files-btn');
+
+        let conversationHistory = [];
+
+        // Auto-resize textarea
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Command modal functionality
+        commandButton.addEventListener('click', () => {
+            commandModal.style.display = 'flex';
+        });
+
+        closeCommandModal.addEventListener('click', () => {
+            commandModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === commandModal) {
+                commandModal.style.display = 'none';
+            }
+        });
+
+        // Command buttons
+        document.querySelectorAll('.command-btn-grid').forEach(button => {
+            button.addEventListener('click', () => {
+                const command = button.getAttribute('data-command');
+                executeSystemCommand(command);
+                commandModal.style.display = 'none';
+            });
+        });
+
+        // Execute custom command
+        executeCustomCommand.addEventListener('click', () => {
+            const customCommand = customCommandInput.value.trim();
+            if (customCommand) {
+                executeSystemCommand(customCommand);
+                customCommandInput.value = '';
+                commandModal.style.display = 'none';
+            } else {
+                showStatusMessage("Please enter a command first", "error");
+            }
+        });
+
+        // Browse files
+        browseFilesBtn.addEventListener('click', async () => {
+            showStatusMessage("Opening file browser...", "info");
+            await executeSystemCommand("open-gui");
+        });
+
+        // Execute system command
+        async function executeSystemCommand(command) {
+            showTypingIndicator();
+            addMessage(`Executing: ${command}`, true);
+            
+            try {
+                const response = await fetch('/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ command: command })
+                });
+                
+                const result = await response.json();
+                hideTypingIndicator();
+                
+                if (result.success) {
+                    displayCommandResult(command, result.output);
+                } else {
+                    addMessage(`Error: ${result.error}`, false);
+                }
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage(`Network error: ${error.message}`, false);
+            }
+        }
+
+        // Display command result
+        function displayCommandResult(command, output) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'ai-message');
+            
+            let displayOutput = output;
+            if (output.length > 1000) {
+                const lines = output.split('\n');
+                if (lines.length > 30) {
+                    displayOutput = `Output truncated (${lines.length} lines total):\n...\n` + 
+                                   lines.slice(-30).join('\n');
+                }
+            }
+            
+            messageDiv.innerHTML = `
+                <strong>Command Result:</strong><br>
+                <code>${command}</code><br><br>
+                <div class="pre-formatted">${escapeHtml(displayOutput)}</div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        // Add message to chat
+        function addMessage(content, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(isUser ? 'user-message' : 'ai-message');
+            messageDiv.textContent = content;
+            
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        // Send message to AI
+        async function sendToAI(message) {
+            showTypingIndicator();
+            
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: `You are Alpha AI, assistant for Alpha OS (Debian-based system).
+Keep responses concise and helpful.
+For system commands, suggest using the command panel (/ button).
+User: ${message}`
+                            }]
+                        }]
+                    })
+                });
+                
+                const data = await response.json();
+                hideTypingIndicator();
+                
+                if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    return data.candidates[0].content.parts[0].text;
+                }
+                throw new Error('No response from AI');
+            } catch (error) {
+                hideTypingIndicator();
+                return "Sorry, I couldn't get a response. Try using system commands instead.";
+            }
+        }
+
+        // Event Listeners
+        sendButton.addEventListener('click', async () => {
+            const message = userInput.value.trim();
+            if (message) {
+                addMessage(message, true);
+                userInput.value = '';
+                userInput.style.height = 'auto';
+                
+                if (message.startsWith('/')) {
+                    executeSystemCommand(message.substring(1));
+                } else {
+                    const response = await sendToAI(message);
+                    addMessage(response, false);
+                }
+            }
+        });
+
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendButton.click();
+            }
+        });
+
+        // UI Helpers
+        function showStatusMessage(message, type = 'info') {
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status-message ${type}-message`;
+            statusDiv.textContent = message;
+            
+            chatMessages.appendChild(statusDiv);
+            scrollToBottom();
+            setTimeout(() => statusDiv.remove(), 3000);
+        }
+
+        function showTypingIndicator() {
+            typingIndicator.style.display = 'block';
+            scrollToBottom();
+        }
+
+        function hideTypingIndicator() {
+            typingIndicator.style.display = 'none';
+        }
+
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize
+        function init() {
+            userInput.focus();
+            scrollToBottom();
+        }
+
+        init();
+    </script>
+</body>
+</html>
